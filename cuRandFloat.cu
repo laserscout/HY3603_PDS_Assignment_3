@@ -6,7 +6,7 @@
  * https://docs.nvidia.com/cuda/curand
  * 
  * Frank Blanning <frankgou@auth.gr>
- * John Flionis < @auth.gr>
+ * John Flionis <iflionis@auth.gr>
  *
  **********************************************************************/
 
