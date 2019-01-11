@@ -12,6 +12,7 @@
 #include <cuda.h>
 //#include "cuNearestNeighborHelper.h"
 #include "cuRandFloat.h"
+#include "cuNearestNeighbor.h"
 
 #define DIM 3
 
@@ -59,6 +60,8 @@ int main (int argc, char *argv[]) {
       printf("%1.4f ", C[i*DIM+d]);
     printf("\n");
   }
+
+  cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>(S,S_size,P,P_size,d,boundaryDist);
 
   /* Cleanup */
   CUDA_CALL(cudaFree(Q));
