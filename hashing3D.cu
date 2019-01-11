@@ -27,12 +27,12 @@ void hashingKernel(float *v, int N, int d, float ***boxes, int *boxesSizes)
 
 	for (int i = process; i < N; i += stride)
 	{
-		x = v[i];
-		y = v[i+1];
-		z = v[i+2];
+		x = v[i*DIM];
+		y = v[i*DIM+1];
+		z = v[i*DIM+2];
 
 		boxIdx = (int)(x*d) + (int)(y*d2) + (int)(z*d3);
-		boxes[boxIdx][boxesSizes[boxIdx]++] = &v[i];
+		boxes[boxIdx][boxesSizes[boxIdx]++] = &v[i*DIM];
 	}
 }
 
@@ -57,7 +57,7 @@ void hashing3D(float *v, int N, int d, float ***boxes, int *boxesSizes)
 	int *boxesSizes_temp;
 	size_t size;
 
-	CUDA_CALL(cudaMallocManged(&boxesSizes_temp, d3));
+	CUDA_CALL(cudaMallocManged(&boxesSizes_temp, d3 * sizeof(int)));
 
 	CUDA_CALL(InitBoxesSizes<<<numberOfBlocks, threadsPerBlock>>>(boxesSizes_temp, d3));
 
@@ -67,7 +67,7 @@ void hashing3D(float *v, int N, int d, float ***boxes, int *boxesSizes)
 
 	ptr =(float **)boxes_temp + d3;
 	for(int i=0;i<d3;i++)
-		boxes_temp[i] = ptr + i*N;
+		boxes_temp[i] = ptr + i*N/d3;
 	// https://www.geeksforgeeks.org/dynamically-allocate-2d-array-c/
 
 	// Making sure that InitBoxesSizes is done initializing boxesSizes_temp before proceeding to hashingKernel launch
