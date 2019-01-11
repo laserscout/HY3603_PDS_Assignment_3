@@ -67,7 +67,7 @@ int main (int argc, char *argv[]) {
   hashing3D(C, NC, d, S, S_Sizes);
 
   // Hashing Q into d*d*d boxes
-  hashing3D(Q_to_S, NQ, d, Q, Q_to_S_Sizes);
+  hashing3D(Q, NQ, d, Q_to_S, Q_to_S_Sizes);
 
   /* Cleanup */
   CUDA_CALL(cudaFree(Q));
