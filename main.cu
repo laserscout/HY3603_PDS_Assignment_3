@@ -60,6 +60,15 @@ int main (int argc, char *argv[]) {
     printf("\n");
   }
 
+  float ***S, ***Q_to_S;
+  int *S_Sizes, *Q_to_S_Sizes;
+  
+  // Hashing C into d*d*d boxes
+  hashing3D(C, NC, d, S, S_Sizes);
+
+  // Hashing Q into d*d*d boxes
+  hashing3D(Q_to_S, NQ, d, Q, Q_to_S_Sizes);
+
   /* Cleanup */
   CUDA_CALL(cudaFree(Q));
   CUDA_CALL(cudaFree(C));
