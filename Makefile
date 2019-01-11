@@ -27,7 +27,7 @@ CUDAPATH = /usr/local/cuda
 CFLAGS = -c -I $(CUDAPATH)/include
 NVCCFLAGS = -c -I $(CUDAPATH)/include
 
-LFLAGS = -L$(CUDAPATH)/lib -lcuda -lcurand
+LFLAGS = -L$(CUDAPATH)/lib -lcuda -lcurand -ftz=true #here of above?
 
 all: build run
 
