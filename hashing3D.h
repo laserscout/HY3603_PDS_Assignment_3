@@ -10,9 +10,14 @@
 #ifndef HASHING3D_H
 #define HASHING3D_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <cuda.h>
+__global__
+void hashingKernel(float *v, int N, int d, int boxIdx,
+                   float **pointersToBoxPoints, int size_boxPoints);
+
+int hashing3D(float *v, int N, int d, float ***boxes, int *boxesSizes,
+               size_t numberOfBlocks, size_t threadsPerBlock);
+
+#endif /* HASHING3D_H */
 
 #ifndef CUDA_CALL
 #define CUDA_CALL(x) do { if((x)!=cudaSuccess) { \
@@ -21,9 +26,3 @@
     __FILE__,__LINE__);\
     return EXIT_FAILURE;}} while(0)
 #endif
-
-__global__ void hashingKernel(float *v, int N, int d, int boxIdx, float **pointersToBoxPoints, int size_boxPoints);
-
-void hashing3D(float *v, int N, int d, float ***boxes, int *boxesSizes);
-
-#endif /* HASHING3D_H */
