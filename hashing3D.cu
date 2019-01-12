@@ -37,7 +37,7 @@ void hashingKernel(float *v, int N, int d, int boxIdx, float **pointersToBoxPoin
 }
 
 
-int hashing3D(float *v, int N, int d, float ***boxes, int *boxesSizes,
+int hashing3D(float *v, int N, int d, float ****boxes, int **boxesSizes,
               size_t numberOfBlocks, size_t threadsPerBlock)
 {
 	int d3 = d * d * d;
@@ -46,17 +46,17 @@ int hashing3D(float *v, int N, int d, float ***boxes, int *boxesSizes,
 	int *boxesSizes_temp;
 	size_t size, size_boxPoints, count;
 
-	CUDA_CALL(cudaMallocManaged(&boxesSizes_temp, d3 * sizeof(int)) );
+	CUDA_CALL(cudaMalloc(&boxesSizes_temp, d3 * sizeof(int)) );
 
 	size = d3 * sizeof(float **) + N * sizeof(float*);
 	// https://www.geeksforgeeks.org/dynamically-allocate-2d-array-c/
 
-	CUDA_CALL(cudaMallocManaged(&boxes_temp, size));
+	CUDA_CALL(cudaMalloc(&boxes_temp, size));
 
 	// Alocating memory for float** to hold the pointers pointing the box points of boxIdx, as found by the hashingKernel
 	size_boxPoints = N * sizeof(float**);
 
-	CUDA_CALL(cudaMallocManaged(&pointersToBoxPoints, size_boxPoints)); 
+	CUDA_CALL(cudaMalloc(&pointersToBoxPoints, size_boxPoints)); 
 
 	// counter to hold the sum of points mapped to all boxIdxs < curent i
 	count = 0;
@@ -87,8 +87,8 @@ int hashing3D(float *v, int N, int d, float ***boxes, int *boxesSizes,
 	}
 
 	// Access of boxes array: boxes[d3][N][0,1,2]; actually it's boxes[d3][boxesSizes[d3]][0,1,2] with boxesSizes[d3] having a sum of N points
-	boxes = boxes_temp;
-	boxesSizes = boxesSizes_temp;
+	*boxes = boxes_temp;
+	*boxesSizes = boxesSizes_temp;
     
     return 0;
 }

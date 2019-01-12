@@ -27,7 +27,7 @@ int randFloat(float **out, int size)
     float *devData;
 
     /* Allocate n floats on device */
-    CUDA_CALL(cudaMallocManaged(&devData, outSize));
+    CUDA_CALL(cudaMalloc(&devData, outSize));
 
     /* Create pseudo-random number generator */
     CURAND_CALL(curandCreateGenerator(&gen, 

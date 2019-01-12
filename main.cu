@@ -18,7 +18,8 @@
 
 int main (int argc, char *argv[]) {
 
-  float *Q, *C;
+  float *Q, *C, *d_Q, *d_C;
+  size_t QSize, CSize;
 //   float ***S, ***Q_to_S;
   int NC,NQ, d;
 //   int *S_Sizes, *Q_to_S_Sizes;
@@ -44,11 +45,26 @@ int main (int argc, char *argv[]) {
   threadsPerBlock = 8*props.warpSize;
   numberOfBlocks  = 50*props.multiProcessorCount;
 
-  randFloat(&Q, NQ);
-  randFloat(&C, NC);
+  randFloat(&d_Q, NQ);
+  randFloat(&d_C, NC);
+  cudaDeviceSynchronize();
 
-  CUDA_CALL(cudaMemPrefetchAsync(Q, NQ, cudaCpuDeviceId));
-  CUDA_CALL(cudaMemPrefetchAsync(C, NC, cudaCpuDeviceId));
+  QSize = DIM * NQ * sizeof(float);
+  if((Q = (float *)malloc(QSize))==NULL) {
+    printf("Malloc error Q\n");
+    exit(1);
+  }
+  CSize = DIM * NQ * sizeof(float);
+  if((C = (float *)malloc(CSize))==NULL) {
+    printf("Malloc error C\n");
+    exit(1);
+  }
+
+  cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost);
+  cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost);
+
+  // CUDA_CALL(cudaMemPrefetchAsync(Q, NQ, cudaCpuDeviceId));
+  // CUDA_CALL(cudaMemPrefetchAsync(C, NC, cudaCpuDeviceId));
 
   /* Show result */
   printf(" ======Q vector====== \n");
@@ -64,19 +80,23 @@ int main (int argc, char *argv[]) {
     printf("\n");
   }
 
+  cudaMemcpy(d_Q, Q, QSize, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_C, C, CSize, cudaMemcpyHostToDevice);
+
+
   float ***S, ***Q_to_S;
   int *S_Sizes, *Q_to_S_Sizes;
   
   // Hashing C into d*d*d boxes
-  hashing3D(C, NC, d, S, S_Sizes, numberOfBlocks, threadsPerBlock);
+  hashing3D(C, NC, d, &S, &S_Sizes, numberOfBlocks, threadsPerBlock);
 
   // Hashing Q into d*d*d boxes
-  hashing3D(Q, NQ, d, Q_to_S, Q_to_S_Sizes, numberOfBlocks, threadsPerBlock);
+  hashing3D(Q, NQ, d, &Q_to_S, &Q_to_S_Sizes, numberOfBlocks, threadsPerBlock);
     
   /* Show result */
   printf("\nd=%d\n\n",d);
     
-  printf(" ======S vector======\n");
+  printf(" ======S vector====== \n");
   for(int boxid=0;boxid<d*d*d;boxid++){
       for(int i = 0; i < S_Sizes[boxid] ; i++){
         for (int d=0; d<DIM; d++)
@@ -84,7 +104,7 @@ int main (int argc, char *argv[]) {
         printf(" N=%d\n",S_Sizes[boxid]);
       }
   }
-  printf(" ===Q_to_S  vector===\n");
+  printf(" ===Q_to_S  vector=== \n");
   for(int boxid=0;boxid<d*d*d;boxid++){
       for(int i = 0; i < Q_to_S_Sizes[boxid] ; i++){
         for (int d=0; d<DIM; d++)
