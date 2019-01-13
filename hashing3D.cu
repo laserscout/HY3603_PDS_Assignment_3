@@ -21,7 +21,7 @@ void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox){
   int stride = blockDim.x * gridDim.x;
 
   int d2 = d * d;
-  int d3 = d * d * d;
+  // int d3 = d * d * d;
   int boxId;
 
   float x, y, z;
@@ -37,7 +37,8 @@ void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox){
 }
 
 int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts, float ***d_vParts,
-              int **partsDim, int **d_partsDim, size_t numberOfBlocks, size_t threadsPerBlock)
+              int **partsDim, int **d_partsDim, int **vBelongsToBox, int **d_vBelongsToBox,
+	      size_t numberOfBlocks, size_t threadsPerBlock)
 {
 
   int d3 = d*d*d;
@@ -71,7 +72,7 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts,
     exit(1);
   }
   
-  printf("tr:%d, bl:%d\n",threadsPerBlock, numberOfBlocks);
+  printf("tr:%zu, bl:%zu\n",threadsPerBlock, numberOfBlocks);
 
   cuFindBelongsToBox<<<threadsPerBlock, numberOfBlocks>>>
     (d_v, N, d, d_belongsToBox);
@@ -113,13 +114,24 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts,
   CUDA_CALL(cudaMemcpy(d_v, v, vSize, cudaMemcpyHostToDevice));
   CUDA_CALL(cudaMemcpy(d_box, box, boxSize, cudaMemcpyHostToDevice));
   CUDA_CALL(cudaMemcpy(d_boxDim, boxDim, boxDimSize, cudaMemcpyHostToDevice));
-  CUDA_CALL(cudaFree(d_belongsToBox));
-  free(belongsToBox);
 
   *vParts = box;
   *d_vParts = d_box;
   *partsDim = boxDim;
   *d_partsDim = d_boxDim;
+  *vBelongsToBox = belongsToBox;
+  *d_vBelongsToBox = d_belongsToBox;
     
   return 0;
+}
+
+int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts, float ***d_vParts,
+              int **partsDim, int **d_partsDim, size_t numberOfBlocks, size_t threadsPerBlock) {
+
+  int *belongsToBox, *d_belongsToBox;
+  int ret = hashing3D(v,d_v,vSize,N,d,vParts,d_vParts,partsDim,d_partsDim,&belongsToBox,
+		      &d_belongsToBox,numberOfBlocks,threadsPerBlock);
+  CUDA_CALL(cudaFree(d_belongsToBox));
+  free(belongsToBox);
+  return ret;
 }

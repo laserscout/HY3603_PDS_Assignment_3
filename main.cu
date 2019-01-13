@@ -13,6 +13,7 @@
 //#include "cuNearestNeighborHelper.h"
 #include "cuRandFloat.h"
 #include "hashing3D.h"
+#include "cuNearestNeighbor.h"
 
 #define DIM 3
 
@@ -20,9 +21,10 @@ int main (int argc, char *argv[]) {
 
   float *Q, *C, *d_Q, *d_C;
   size_t QSize, CSize;
-  float **S, **d_S;
+  float **S, **d_S, **P, **d_P;
   int NC, NQ, d;
-  int *SDim, *d_SDim;
+  int *SDim, *d_SDim, *PDim, *d_PDim;
+  cudaError_t err;
 
   if (argc != 4) {
     printf("Usage: %s arg1 arg2 arg3\n  where NC=2^arg1, NQ=2^arg2 and d=2^arg3\n",
@@ -34,16 +36,18 @@ int main (int argc, char *argv[]) {
   NQ = 1<<atoi(argv[2]);
   d  = 1<<atoi(argv[3]);
   
-  size_t threadsPerBlock;
-  size_t numberOfBlocks;
+  size_t threadsPerBlock, warp;
+  size_t numberOfBlocks, multiP;
 
   int deviceId;
   cudaDeviceProp props;
   cudaGetDevice(&deviceId);
   cudaGetDeviceProperties(&props, deviceId);
-  
-  threadsPerBlock = 8*props.warpSize;
-  numberOfBlocks  = 5*props.multiProcessorCount;
+
+  warp = props.warpSize;
+  multiP = props.multiProcessorCount;
+  threadsPerBlock = 8*warp;
+  numberOfBlocks  = 5*multiP;
 
   randFloat(&Q, &d_Q, NQ);
   randFloat(&C, &d_C, NC);
@@ -60,11 +64,8 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
-  cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost);
-  cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost);
-
-  // CUDA_CALL(cudaMemPrefetchAsync(Q, NQ, cudaCpuDeviceId));
-  // CUDA_CALL(cudaMemPrefetchAsync(C, NC, cudaCpuDeviceId));
+  CUDA_CALL(cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost));
+  CUDA_CALL(cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost));
 
   /* Show result */
   printf(" ======Q vector====== \n");
@@ -83,6 +84,10 @@ int main (int argc, char *argv[]) {
   // Hashing C into d*d*d boxes
   hashing3D(C, d_C, CSize, NC, d, &S, &d_S, &SDim, &d_SDim, numberOfBlocks, threadsPerBlock);
 
+  int *QBoxIdToCheck, *d_QBoxIdToCheck;
+  hashing3D(Q, d_Q, QSize, NQ, d, &P, &d_P, &PDim, &d_PDim, &QBoxIdToCheck, &d_QBoxIdToCheck,
+	    numberOfBlocks, threadsPerBlock);
+
   /* Show result */
   printf("\nd=%d\n\n",d);
   printf(" ======S vector====== \n");
@@ -95,18 +100,39 @@ int main (int argc, char *argv[]) {
       }
   }
 
-  cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>(S,S_size,P,P_size,d,boundaryDist);
+  float **neighbor, **d_neighbor;
+  size_t neighborSize = NQ * sizeof(float *);
+  
+  CUDA_CALL(cudaMalloc(&d_neighbor,neighborSize));
+  neighbor = (float **)malloc(neighborSize);
+  if(neighbor == NULL) {
+    printf("Error allocating neighbor");
+    exit(1);
+  }
 
+  cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>
+    (d_S,d_SDim,d_Q,d_QBoxIdToCheck,d,d_neighbor);
+  err = cudaGetLastError();
+  if (err != cudaSuccess) {
+      printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
+             __FILE__,__LINE__);
+      return EXIT_FAILURE;
+  }
+
+
+  CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
 
   /* Cleanup */
   CUDA_CALL(cudaFree(d_Q));
   CUDA_CALL(cudaFree(d_C));
   CUDA_CALL(cudaFree(d_S));
   CUDA_CALL(cudaFree(d_SDim));
+  CUDA_CALL(cudaFree(d_QBoxIdToCheck));
   free(Q);
   free(C);
   free(S);
   free(SDim);
+  free(QBoxIdToCheck);
   
   return 0;
 }

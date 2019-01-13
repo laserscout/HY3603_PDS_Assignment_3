@@ -13,6 +13,10 @@
 int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts, float ***d_vParts,
               int **partsDim, int **d_partsDim, size_t numberOfBlocks, size_t threadsPerBlock);
 
+int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts, float ***d_vParts,
+              int **partsDim, int **d_partsDim, int **vBelongsToBox, int **d_vBelongsToBox,
+	      size_t numberOfBlocks, size_t threadsPerBlock);
+
 #endif /* HASHING3D_H */
 
 #ifndef CUDA_CALL
