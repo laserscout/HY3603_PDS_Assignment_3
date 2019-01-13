@@ -19,7 +19,7 @@
 #include <curand.h>
 
 
-int randFloat(float **out, int size);
+int randFloat(float **out, float **d_out, int size);
 
 #endif /* CU_RAND_FLOAT_H */
 
