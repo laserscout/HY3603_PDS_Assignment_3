@@ -42,7 +42,7 @@ int randFloat(float **out, float **d_out, int size)
     CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, AEM));
 
     /* Set offset */
-    CURAND_CALL(curandSetPseudoRandomGeneratorOffset(gen, offset));
+    CURAND_CALL(curandSetGeneratorOffset(gen, offset));
 
     /* Generate n floats on device */
     CURAND_CALL(curandGenerateUniform(gen, d_data, n));
@@ -54,7 +54,7 @@ int randFloat(float **out, float **d_out, int size)
        is the better opption here */
 
     /* Copy device memory to host */
-    CUDA_CALL(cudaMemcpy(data, d_data, dataSize), cudaMemcpyDeviceToHost));
+    CUDA_CALL(cudaMemcpy(data, d_data, dataSize, cudaMemcpyDeviceToHost));
 
     offset += n;
     *d_out = d_data;
