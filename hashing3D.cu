@@ -15,7 +15,7 @@
 #define DIM 3
 
 __global__
-void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox, int *boxDim){
+void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox){
 
   int proccess = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
@@ -26,9 +26,6 @@ void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox, int *boxDim)
 
   float x, y, z;
 
-  for(boxId=proccess; boxId<d3; boxId+=stride)
-    boxDim[boxId]=0;
-
   for(int n=proccess; n<N; n+=stride){
       x = v[n*DIM];
       y = v[n*DIM+1];
@@ -36,7 +33,6 @@ void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox, int *boxDim)
       boxId = (int)(x*d) +(int)(y*d)*d +(int)(z*d)*d2;
       printf("%d:%d = %d + %d + %d\n",n,boxId,(int)(x*d),(int)(y*d)*d,(int)(z*d)*d*d); 
       belongsToBox[n] = boxId;
-      // boxDim[boxId]++;
     }
 }
 
@@ -75,12 +71,11 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts,
   }
 
   cuFindBelongsToBox<<<threadsPerBlock, numberOfBlocks>>>
-    (d_v, N, d, d_belongsToBox, d_boxDim);
+    (d_v, N, d, d_belongsToBox);
   CUDA_CALL(cudaDeviceSynchronize());
 
   // CUDA_CALL(cudaMemcpy(v, d_v, vSize, cudaMemcpyDevicyToHost));
   CUDA_CALL(cudaMemcpy(belongsToBox, d_belongsToBox, belongsToBoxSize, cudaMemcpyDeviceToHost));
-  CUDA_CALL(cudaMemcpy(boxDim, d_boxDim, boxDimSize, cudaMemcpyDeviceToHost));
 
   position = 0;
   for(int boxId=0; boxId<d3; boxId++){
