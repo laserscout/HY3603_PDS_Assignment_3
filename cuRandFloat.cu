@@ -17,42 +17,49 @@
 #include <curand.h>
 
 #define AEM 8263-6698
+#define DIM 3
 
-int randFloat(float **out, int size)
+int randFloat(float **out, float **d_out, int size)
 {
-    size_t n = 1<<size;
-    size_t d = 3;          // Number of dimentions for each float
-    size_t outSize = n*d*sizeof(float);
+    size_t n = DIM*size;
+    size_t dataSize = n*sizeof(float);
     curandGenerator_t gen;
-    float *devData;
+    float *data, *d_data;
+    static int offset = 0;
 
     /* Allocate n floats on device */
-    CUDA_CALL(cudaMallocManaged(&devData, outSize));
+    CUDA_CALL(cudaMalloc(&d_data, dataSize));
+    data = (float *)malloc(dataSize);
+    if(data == NULL) {
+      printf("Error allocating data");
+      exit(1);
+    }
 
     /* Create pseudo-random number generator */
-    CURAND_CALL(curandCreateGenerator(&gen, 
-                CURAND_RNG_PSEUDO_DEFAULT));
+    CURAND_CALL(curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT));
     
     /* Set seed */
-    CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, 
-                AEM));
+    CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, AEM));
+
+    /* Set offset */
+    CURAND_CALL(curandSetGeneratorOffset(gen, offset));
 
     /* Generate n floats on device */
-    CURAND_CALL(curandGenerateUniform(gen, devData, n));
-    
-    *out = devData;
+    CURAND_CALL(curandGenerateUniform(gen, d_data, n));
 
-    // /* Copy device memory to host */
-    // CUDA_CALL(cudaMemcpy(hostData, devData, n * sizeof(float),
-    //     cudaMemcpyDeviceToHost));
+    /*                           WARNING!!                            */
+    /* There is no way in my knowledge to have curand include 0 in its
+       generation and exclude 1. I just wanted to play with curand in
+       this assignment, that's why i kept it. Normal rand from the CPU
+       is the better opption here */
 
-    // /* Show result */
-    // for(i = 0; i < n; i++) {
-    //     printf("%1.4f ", hostData[i]);
-    // }
-    // printf("\n");
+    /* Copy device memory to host */
+    CUDA_CALL(cudaMemcpy(data, d_data, dataSize, cudaMemcpyDeviceToHost));
 
-    /* Cleanup */
+    offset += n;
+    *d_out = d_data;
+    *out = data;
+
     CURAND_CALL(curandDestroyGenerator(gen));
     return EXIT_SUCCESS;
 }

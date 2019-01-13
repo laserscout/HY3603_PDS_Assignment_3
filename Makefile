@@ -25,9 +25,9 @@ CUDAPATH = /usr/local/cuda
 # you could also force nvcc to compile 64-bit with -m64 flag. (and remove -m32 instances)
 
 CFLAGS = -c -I $(CUDAPATH)/include
-NVCCFLAGS = -c -I $(CUDAPATH)/include
+NVCCFLAGS = -c -I $(CUDAPATH)/include -Wno-deprecated-gpu-targets
 
-LFLAGS = -L$(CUDAPATH)/lib -lcuda -lcurand -ftz=true #here of above?
+LFLAGS = -L$(CUDAPATH)/lib -lcuda -lcurand -Wno-deprecated-gpu-targets -ftz=true #here of above?
 
 all: build run
 
@@ -46,4 +46,4 @@ clean:
 	rm *.o
 
 run:
-	./$(PROJECT_NAME) 3 3
+	./$(PROJECT_NAME) 3 3 3
