@@ -45,6 +45,7 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts,
   int *boxDim, *d_boxDim, *belongsToBox, *d_belongsToBox;
   float tempX, tempY, tempZ;
   float **box, **d_box;
+  cudaError_t err;
   
   size_t boxSize          = d3*sizeof(float *);
   size_t boxDimSize       = d3*sizeof(int);
@@ -69,9 +70,17 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts,
     printf("Error allocating belongsToBox\n");
     exit(1);
   }
+  
+  printf("tr:%d, bl:%d\n",threadsPerBlock, numberOfBlocks);
 
   cuFindBelongsToBox<<<threadsPerBlock, numberOfBlocks>>>
     (d_v, N, d, d_belongsToBox);
+  err = cudaGetLastError();
+  if (err != cudaSuccess) {
+      printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
+             __FILE__,__LINE__);
+      return EXIT_FAILURE;
+  }
   CUDA_CALL(cudaDeviceSynchronize());
 
   // CUDA_CALL(cudaMemcpy(v, d_v, vSize, cudaMemcpyDevicyToHost));

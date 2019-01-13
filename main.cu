@@ -43,10 +43,10 @@ int main (int argc, char *argv[]) {
   cudaGetDeviceProperties(&props, deviceId);
   
   threadsPerBlock = 8*props.warpSize;
-  numberOfBlocks  = 50*props.multiProcessorCount;
+  numberOfBlocks  = 5*props.multiProcessorCount;
 
-  randFloat(&d_Q, NQ);
-  randFloat(&d_C, NC);
+  randFloat(&Q, &d_Q, NQ);
+  randFloat(&C, &d_C, NC);
   cudaDeviceSynchronize();
 
   QSize = DIM * NQ * sizeof(float);
