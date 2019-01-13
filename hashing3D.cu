@@ -33,8 +33,8 @@ void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox, int *boxDim)
       x = v[n*DIM];
       y = v[n*DIM+1];
       z = v[n*DIM+2];
-      boxId = (int)(x*d) + (int)(y*d2) + (int)(z*d3)-1; //THIS IS WRONG
-      printf("%d:%d\n",n,boxId);
+      boxId = (int)(x*d) +(int)(y*d)*d +(int)(z*d)*d2;
+      printf("%d:%d = %d + %d + %d\n",n,boxId,(int)(x*d),(int)(y*d)*d,(int)(z*d)*d*d); 
       belongsToBox[n] = boxId;
       // boxDim[boxId]++;
     }
