@@ -13,6 +13,7 @@
 //#include "cuNearestNeighborHelper.h"
 #include "cuRandFloat.h"
 #include "hashing3D.h"
+#include "cpuValidation.h"
 
 #define DIM 3
 
@@ -96,6 +97,9 @@ int main (int argc, char *argv[]) {
         printf("\n");
       }
   }
+
+  /* Validating the NN results */
+  cpuValidation(Q, NQ, C, NC, results);
 
   /* Cleanup */
   CUDA_CALL(cudaFree(d_Q));
