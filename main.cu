@@ -20,9 +20,9 @@ int main (int argc, char *argv[]) {
 
   float *Q, *C, *d_Q, *d_C;
   size_t QSize, CSize;
-//   float ***S, ***Q_to_S;
-  int NC,NQ, d;
-//   int *S_Sizes, *Q_to_S_Sizes;
+  float **S, **d_S;
+  int NC, NQ, d;
+  int *SDim, *d_SDim;
 
   if (argc != 4) {
     printf("Usage: %s arg1 arg2 arg3\n  where NC=2^arg1, NQ=2^arg2 and d=2^arg3\n",
@@ -80,46 +80,32 @@ int main (int argc, char *argv[]) {
     printf("\n");
   }
 
-  cudaMemcpy(d_Q, Q, QSize, cudaMemcpyHostToDevice);
   cudaMemcpy(d_C, C, CSize, cudaMemcpyHostToDevice);
 
-
-  float ***S, ***Q_to_S;
-  int *S_Sizes, *Q_to_S_Sizes;
-  
   // Hashing C into d*d*d boxes
-  hashing3D(C, NC, d, &S, &S_Sizes, numberOfBlocks, threadsPerBlock);
+  hashing3D(C, d_C, CSize, NC, d, &S, &d_S, &SDim, &d_SDim, numberOfBlocks, threadsPerBlock);
 
-  // Hashing Q into d*d*d boxes
-  hashing3D(Q, NQ, d, &Q_to_S, &Q_to_S_Sizes, numberOfBlocks, threadsPerBlock);
-    
   /* Show result */
   printf("\nd=%d\n\n",d);
-    
   printf(" ======S vector====== \n");
   for(int boxid=0;boxid<d*d*d;boxid++){
-      for(int i = 0; i < S_Sizes[boxid] ; i++){
+    printf("Box%d size=%d\n", boxid, SDim[boxid]);
+      for(int i = 0; i < SDim[boxid] ; i++){
         for (int d=0; d<DIM; d++)
-          printf("%1.4f ", S[boxid][i][d]);
-        printf(" N=%d\n",S_Sizes[boxid]);
-      }
-  }
-  printf(" ===Q_to_S  vector=== \n");
-  for(int boxid=0;boxid<d*d*d;boxid++){
-      for(int i = 0; i < Q_to_S_Sizes[boxid] ; i++){
-        for (int d=0; d<DIM; d++)
-          printf("%1.4f ", Q_to_S[boxid][i][d]);
-        printf(" N=%d\n",Q_to_S_Sizes[boxid]);
+          printf("%1.4f ", S[boxid][i*DIM +d]);
+        printf("\n");
       }
   }
 
   /* Cleanup */
-  CUDA_CALL(cudaFree(Q));
-  CUDA_CALL(cudaFree(C));
-  CUDA_CALL(cudaFree(Q_to_S));
-  CUDA_CALL(cudaFree(S));
-  CUDA_CALL(cudaFree(Q_to_S_Sizes));
-  CUDA_CALL(cudaFree(S_Sizes));
-
+  CUDA_CALL(cudaFree(d_Q));
+  CUDA_CALL(cudaFree(d_C));
+  CUDA_CALL(cudaFree(d_S));
+  CUDA_CALL(cudaFree(d_SDim));
+  free(Q);
+  free(C);
+  free(S);
+  free(SDim);
+  
   return 0;
 }

@@ -10,12 +10,8 @@
 #ifndef HASHING3D_H
 #define HASHING3D_H
 
-__global__
-void hashingKernel(float *v, int N, int d, int boxIdx,
-                   float **pointersToBoxPoints, int size_boxPoints);
-
-int hashing3D(float *v, int N, int d, float ****boxes, int **boxesSizes,
-               size_t numberOfBlocks, size_t threadsPerBlock);
+int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts, float ***d_vParts,
+              int **partsDim, int **d_partsDim, size_t numberOfBlocks, size_t threadsPerBlock);
 
 #endif /* HASHING3D_H */
 

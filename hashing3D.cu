@@ -15,81 +15,107 @@
 #define DIM 3
 
 __global__
-void hashingKernel(float *v, int N, int d, int boxIdx, float **pointersToBoxPoints, int size_boxPoints)
-{
-	int proccess = threadIdx.x + blockIdx.x * blockDim.x;
-	int stride = blockDim.x * gridDim.x;
+void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox, int *boxDim){
 
-	int d2 = d * d;
-	int d3 = d * d * d;
+  int proccess = threadIdx.x + blockIdx.x * blockDim.x;
+  int stride = blockDim.x * gridDim.x;
 
-	float x, y, z;
+  int d2 = d * d;
+  int d3 = d * d * d;
+  int boxId;
 
-	for (int i = proccess; i < N; i += stride)
-	{
-		x = v[i*DIM];
-		y = v[i*DIM+1];
-		z = v[i*DIM+2];
+  float x, y, z;
 
-		if(boxIdx == (int)(x*d) + (int)(y*d2) + (int)(z*d3))
-			pointersToBoxPoints[size_boxPoints++] = &v[i*DIM];
-	}
+  for(boxId=proccess; boxId<d3; boxId+=stride)
+    boxDim[boxId]=0;
+
+  for(int n=proccess; n<N; n+=stride){
+      x = v[n*DIM];
+      y = v[n*DIM+1];
+      z = v[n*DIM+2];
+      boxId = (int)(x*d) + (int)(y*d2) + (int)(z*d3)-1; //THIS IS WRONG
+      printf("%d:%d\n",n,boxId);
+      belongsToBox[n] = boxId;
+      // boxDim[boxId]++;
+    }
 }
 
-
-int hashing3D(float *v, int N, int d, float ****boxes, int **boxesSizes,
-              size_t numberOfBlocks, size_t threadsPerBlock)
+int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts, float ***d_vParts,
+              int **partsDim, int **d_partsDim, size_t numberOfBlocks, size_t threadsPerBlock)
 {
-	int d3 = d * d * d;
 
-	float ***boxes_temp, **ptr, **pointersToBoxPoints;
-	int *boxesSizes_temp;
-	size_t size, size_boxPoints, count;
+  int d3 = d*d*d;
+  int position, tempBelongs;
+  int *boxDim, *d_boxDim, *belongsToBox, *d_belongsToBox;
+  float tempX, tempY, tempZ;
+  float **box, **d_box;
+  
+  size_t boxSize          = d3*sizeof(float *);
+  size_t boxDimSize       = d3*sizeof(int);
+  size_t belongsToBoxSize =  N*sizeof(int);
 
-	CUDA_CALL(cudaMalloc(&boxesSizes_temp, d3 * sizeof(int)) );
+  CUDA_CALL(cudaMalloc(&d_boxDim, boxDimSize));
+  CUDA_CALL(cudaMalloc(&d_box, boxSize));
+  CUDA_CALL(cudaMalloc(&d_belongsToBox, belongsToBoxSize));
 
-	size = d3 * sizeof(float **) + N * sizeof(float*);
-	// https://www.geeksforgeeks.org/dynamically-allocate-2d-array-c/
+  boxDim = (int *)malloc(boxDimSize);
+  if(boxDim == NULL) {
+    printf("Error allocating boxDim\n");
+    exit(1);
+  }
+  box = (float **)malloc(boxSize);
+  if(box == NULL) {
+    printf("Error allocating box\n");
+    exit(1);
+  }
+  belongsToBox = (int *)malloc(belongsToBoxSize);
+  if(belongsToBox == NULL) {
+    printf("Error allocating belongsToBox\n");
+    exit(1);
+  }
 
-	CUDA_CALL(cudaMalloc(&boxes_temp, size));
+  cuFindBelongsToBox<<<threadsPerBlock, numberOfBlocks>>>
+    (d_v, N, d, d_belongsToBox, d_boxDim);
+  CUDA_CALL(cudaDeviceSynchronize());
 
-	// Alocating memory for float** to hold the pointers pointing the box points of boxIdx, as found by the hashingKernel
-	size_boxPoints = N * sizeof(float**);
+  // CUDA_CALL(cudaMemcpy(v, d_v, vSize, cudaMemcpyDevicyToHost));
+  CUDA_CALL(cudaMemcpy(belongsToBox, d_belongsToBox, belongsToBoxSize, cudaMemcpyDeviceToHost));
+  CUDA_CALL(cudaMemcpy(boxDim, d_boxDim, boxDimSize, cudaMemcpyDeviceToHost));
 
-	CUDA_CALL(cudaMalloc(&pointersToBoxPoints, size_boxPoints)); 
+  position = 0;
+  for(int boxId=0; boxId<d3; boxId++){
+    box[boxId] = v + DIM*position;
+    boxDim[boxId] = 0;
+    for(int n=position; n<N; n++){
+      if(belongsToBox[n] == boxId) {
+	tempX             = v[DIM*position];
+	tempY             = v[DIM*position+1];
+	tempZ             = v[DIM*position+2];
+	v[DIM*position]   = v[DIM*n];
+	v[DIM*position+1] = v[DIM*n+1];
+	v[DIM*position+2] = v[DIM*n+2];
+	v[DIM*n]          = tempX;
+	v[DIM*n+1]        = tempY;
+	v[DIM*n+2]        = tempZ;
+	tempBelongs = belongsToBox[position];
+	belongsToBox[position] = belongsToBox[n];
+	belongsToBox[n] = tempBelongs;
+	position++;
+	boxDim[boxId]++;
+      }
+    }
+  }
 
-	// counter to hold the sum of points mapped to all boxIdxs < curent i
-	count = 0;
+  CUDA_CALL(cudaMemcpy(d_v, v, vSize, cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMemcpy(d_box, box, boxSize, cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMemcpy(d_boxDim, boxDim, boxDimSize, cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaFree(d_belongsToBox));
+  free(belongsToBox);
 
-	// Reserving the first d3 positions of boxes_temp for the boxes_temp[i] double pointers
-	ptr =(float **)boxes_temp + d3;
-	
-	for(int i=0;i<d3;i++) {
-
-		size_boxPoints = 0;
-		
-		hashingKernel<<<numberOfBlocks, threadsPerBlock>>>
-            (v, N, d, i,pointersToBoxPoints, size_boxPoints);
-        
-		cudaDeviceSynchronize();
-		// size_boxPoints is the number of points that are mapped to boxIdx = i, so
-		boxesSizes_temp[i] = size_boxPoints;
-		
-		// boxes_temp[i] = boxes_temp + sum of points mapped to all boxIdxs < i
-		boxes_temp[i] = ptr + count;
-		
-		// Post incrementing the counter count, so that it gives the correct offset for the next iteration
-		count += size_boxPoints;
-		
-		for(int boxPoints = 0; boxPoints < size_boxPoints; boxPoints++)
-			// Placing each pointer of each box's point into the appropriate positions of boxes_temp
-			boxes_temp[i][boxPoints] = pointersToBoxPoints[boxPoints];
-	}
-
-	// Access of boxes array: boxes[d3][N][0,1,2]; actually it's boxes[d3][boxesSizes[d3]][0,1,2] with boxesSizes[d3] having a sum of N points
-	*boxes = boxes_temp;
-	*boxesSizes = boxesSizes_temp;
+  *vParts = box;
+  *d_vParts = d_box;
+  *partsDim = boxDim;
+  *d_partsDim = d_boxDim;
     
-    return 0;
+  return 0;
 }
-
