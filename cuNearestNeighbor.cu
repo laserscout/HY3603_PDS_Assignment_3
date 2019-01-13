@@ -47,7 +47,7 @@ void cuNearestNeighbor(float **S, int * S_size, float ***P, int *P_size,
 	dy = q[y] - c[y];
 	dz = q[z] - c[z];
 	distSqr = dx*dx + dy*dy + dz*dz + SOFTENING;
-	dist = cbrtf(distSqr);
+	dist = sqrtf(distSqr);
 	if(dist<nearestDist){
 	  nearestDist = dist;
 	  nearestIdx = S_num;
