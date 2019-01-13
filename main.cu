@@ -66,31 +66,39 @@ int main (int argc, char *argv[]) {
 
   float ***S, ***Q_to_S;
   int *S_Sizes, *Q_to_S_Sizes;
+  int d3 = d*d*d;
   
   // Hashing C into d*d*d boxes
-  hashing3D(C, NC, d, S, S_Sizes, numberOfBlocks, threadsPerBlock);
+  hashing3D(C, NC, d, &S, &S_Sizes, numberOfBlocks, threadsPerBlock);
 
   // Hashing Q into d*d*d boxes
-  hashing3D(Q, NQ, d, Q_to_S, Q_to_S_Sizes, numberOfBlocks, threadsPerBlock);
+  hashing3D(Q, NQ, d, &Q_to_S, &Q_to_S_Sizes, numberOfBlocks, threadsPerBlock);
     
+  CUDA_CALL(cudaMemPrefetchAsync(S, d3 * sizeof(float **) + NC * sizeof(float*), cudaCpuDeviceId));
+  CUDA_CALL(cudaMemPrefetchAsync(Q_to_S, d3 * sizeof(float **) + NQ * sizeof(float*), cudaCpuDeviceId));
+  CUDA_CALL(cudaMemPrefetchAsync(S_Sizes, d3, cudaCpuDeviceId));  
+  CUDA_CALL(cudaMemPrefetchAsync(Q_to_S_Sizes, d3, cudaCpuDeviceId));
+
   /* Show result */
   printf("\nd=%d\n\n",d);
     
   printf(" ======S vector======\n");
   for(int boxid=0;boxid<d*d*d;boxid++){
-      for(int i = 0; i < S_Sizes[boxid] ; i++){
+      for(int i = 0; i < S_Sizes[boxid] ; i++) {
         for (int d=0; d<DIM; d++)
           printf("%1.4f ", S[boxid][i][d]);
-        printf(" N=%d\n",S_Sizes[boxid]);
-      }
+      	printf("\n");
+  	  }
+      printf(" S_Sizes[%d]=%d\n",boxid,S_Sizes[boxid]);
   }
   printf(" ===Q_to_S  vector===\n");
   for(int boxid=0;boxid<d*d*d;boxid++){
-      for(int i = 0; i < Q_to_S_Sizes[boxid] ; i++){
+      for(int i = 0; i < Q_to_S_Sizes[boxid] ; i++) {
         for (int d=0; d<DIM; d++)
           printf("%1.4f ", Q_to_S[boxid][i][d]);
-        printf(" N=%d\n",Q_to_S_Sizes[boxid]);
+      	printf("\n");
       }
+      printf(" Q_to_S_Sizes[%d]=%d\n",boxid,Q_to_S_Sizes[boxid]);
   }
 
   /* Cleanup */
