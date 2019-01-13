@@ -12,9 +12,9 @@
 
 __global__
 void hashingKernel(float *v, int N, int d, int boxIdx,
-                   float **pointersToBoxPoints, int size_boxPoints);
+                   float **pointersToBoxPoints, int *size_boxPoints);
 
-int hashing3D(float *v, int N, int d, float ***boxes, int *boxesSizes,
+int hashing3D(float *v, int N, int d, float ****boxes, int **boxesSizes,
                size_t numberOfBlocks, size_t threadsPerBlock);
 
 #endif /* HASHING3D_H */
