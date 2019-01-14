@@ -21,9 +21,9 @@ int main (int argc, char *argv[]) {
 
   float *Q, *C, *d_Q, *d_C;
   size_t QSize, CSize;
-  float **S, **d_S, **P, **d_P;
+  int *S, *d_S, *P, *d_P;
   int NC, NQ, d;
-  int *SDim, *d_SDim, *PDim, *d_PDim;
+  int SDim;
   cudaError_t err;
 
   if (argc != 4) {
@@ -50,22 +50,10 @@ int main (int argc, char *argv[]) {
   numberOfBlocks  = 5*multiP;
 
   randFloat(&Q, &d_Q, NQ);
-  randFloat(&C, &d_C, NC);
-  cudaDeviceSynchronize();
-
   QSize = DIM * NQ * sizeof(float);
-  if((Q = (float *)malloc(QSize))==NULL) {
-    printf("Malloc error Q\n");
-    exit(1);
-  }
-  CSize = DIM * NQ * sizeof(float);
-  if((C = (float *)malloc(CSize))==NULL) {
-    printf("Malloc error C\n");
-    exit(1);
-  }
-
-  CUDA_CALL(cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost));
-  CUDA_CALL(cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost));
+  randFloat(&C, &d_C, NC);
+  CSize = DIM * NC * sizeof(float);
+  CUDA_CALL(cudaDeviceSynchronize());
 
   /* Show result */
   printf(" ======Q vector====== \n");
@@ -82,56 +70,71 @@ int main (int argc, char *argv[]) {
   }
 
   // Hashing C into d*d*d boxes
-  hashing3D(C, d_C, CSize, NC, d, &S, &d_S, &SDim, &d_SDim, numberOfBlocks, threadsPerBlock);
+  hashing3D(C, d_C, CSize, NC, d, &S, &d_S, numberOfBlocks, threadsPerBlock);
 
   int *QBoxIdToCheck, *d_QBoxIdToCheck;
-  hashing3D(Q, d_Q, QSize, NQ, d, &P, &d_P, &PDim, &d_PDim, &QBoxIdToCheck, &d_QBoxIdToCheck,
+  hashing3D(Q, d_Q, QSize, NQ, d, &P, &d_P, &QBoxIdToCheck, &d_QBoxIdToCheck,
 	    numberOfBlocks, threadsPerBlock);
 
   /* Show result */
   printf("\nd=%d\n\n",d);
+  printf(" ====new Q vector==== \n");
+  for(int i = 0; i < NQ ; i++){
+    for (int d=0; d<DIM; d++)
+      printf("%1.4f ", Q[i*DIM+d]);
+    printf("| Belongs to box:%d\n",QBoxIdToCheck[i]);
+  }
   printf(" ======S vector====== \n");
   for(int boxid=0;boxid<d*d*d;boxid++){
-    printf("Box%d size=%d\n", boxid, SDim[boxid]);
-      for(int i = 0; i < SDim[boxid] ; i++){
+    SDim = (S[boxid+1]-S[boxid])/3;
+    printf("Box%d size=%d\n", boxid, SDim);
+      for(int i = 0; i < SDim ; i++){
         for (int d=0; d<DIM; d++)
-          printf("%1.4f ", S[boxid][i*DIM +d]);
+          printf("%1.4f ", C[ S[boxid] +i*DIM +d ]);
         printf("\n");
       }
   }
 
-  float **neighbor, **d_neighbor;
-  size_t neighborSize = NQ * sizeof(float *);
+  int *neighbor, *d_neighbor;
+  size_t neighborSize = NQ * sizeof(int);
   
   CUDA_CALL(cudaMalloc(&d_neighbor,neighborSize));
-  neighbor = (float **)malloc(neighborSize);
+  neighbor = (int *)malloc(neighborSize);
   if(neighbor == NULL) {
     printf("Error allocating neighbor");
     exit(1);
   }
 
   cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>
-    (d_S,d_SDim,d_Q,d_QBoxIdToCheck,d,d_neighbor);
+    (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor);
   err = cudaGetLastError();
   if (err != cudaSuccess) {
       printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
              __FILE__,__LINE__);
       return EXIT_FAILURE;
   }
-
+  CUDA_CALL(cudaDeviceSynchronize());
 
   CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
+
+  printf(" ==== Neighbors! ==== \n");
+  for(int i = 0; i < NQ ; i++){
+    for (int d=0; d<DIM; d++)
+      printf("%1.4f ", Q[i*DIM+d]);
+    printf("-> ");
+    for (int d=0; d<DIM; d++)
+      printf("%1.4f ", C[neighbor[i]+d]);
+    printf("\n");
+  }
 
   /* Cleanup */
   CUDA_CALL(cudaFree(d_Q));
   CUDA_CALL(cudaFree(d_C));
   CUDA_CALL(cudaFree(d_S));
-  CUDA_CALL(cudaFree(d_SDim));
   CUDA_CALL(cudaFree(d_QBoxIdToCheck));
   free(Q);
   free(C);
   free(S);
-  free(SDim);
   free(QBoxIdToCheck);
   
   return 0;

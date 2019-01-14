@@ -31,39 +31,30 @@ void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox){
       y = v[n*DIM+1];
       z = v[n*DIM+2];
       boxId = (int)(x*d) +(int)(y*d)*d +(int)(z*d)*d2;
-      printf("%d:%d = %d + %d + %d\n",n,boxId,(int)(x*d),(int)(y*d)*d,(int)(z*d)*d*d); 
+      // printf("%d:%d = %d + %d + %d\n",n,boxId,(int)(x*d),(int)(y*d)*d,(int)(z*d)*d*d); 
       belongsToBox[n] = boxId;
     }
 }
 
-int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts, float ***d_vParts,
-              int **partsDim, int **d_partsDim, int **vBelongsToBox, int **d_vBelongsToBox,
-	      size_t numberOfBlocks, size_t threadsPerBlock)
+int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStart, int **d_vPartsStart,
+              int **vBelongsToBox, int **d_vBelongsToBox, size_t numberOfBlocks, size_t threadsPerBlock)
 {
 
   int d3 = d*d*d;
   int position, tempBelongs;
-  int *boxDim, *d_boxDim, *belongsToBox, *d_belongsToBox;
+  int *belongsToBox, *d_belongsToBox, *boxStart, *d_boxStart;
   float tempX, tempY, tempZ;
-  float **box, **d_box;
   cudaError_t err;
   
-  size_t boxSize          = d3*sizeof(float *);
-  size_t boxDimSize       = d3*sizeof(int);
+  size_t boxStartSize     = (d3+1)*sizeof(int);
   size_t belongsToBoxSize =  N*sizeof(int);
 
-  CUDA_CALL(cudaMalloc(&d_boxDim, boxDimSize));
-  CUDA_CALL(cudaMalloc(&d_box, boxSize));
+  CUDA_CALL(cudaMalloc(&d_boxStart, boxStartSize));
   CUDA_CALL(cudaMalloc(&d_belongsToBox, belongsToBoxSize));
 
-  boxDim = (int *)malloc(boxDimSize);
-  if(boxDim == NULL) {
-    printf("Error allocating boxDim\n");
-    exit(1);
-  }
-  box = (float **)malloc(boxSize);
-  if(box == NULL) {
-    printf("Error allocating box\n");
+  boxStart = (int *)malloc(boxStartSize);
+  if(boxStart == NULL) {
+    printf("Error allocating boxStart\n");
     exit(1);
   }
   belongsToBox = (int *)malloc(belongsToBoxSize);
@@ -89,8 +80,7 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts,
 
   position = 0;
   for(int boxId=0; boxId<d3; boxId++){
-    box[boxId] = v + DIM*position;
-    boxDim[boxId] = 0;
+    boxStart[boxId] = DIM*position;
     for(int n=position; n<N; n++){
       if(belongsToBox[n] == boxId) {
 	tempX             = v[DIM*position];
@@ -106,30 +96,28 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts,
 	belongsToBox[position] = belongsToBox[n];
 	belongsToBox[n] = tempBelongs;
 	position++;
-	boxDim[boxId]++;
       }
     }
   }
+  boxStart[d3]=DIM*N;
 
   CUDA_CALL(cudaMemcpy(d_v, v, vSize, cudaMemcpyHostToDevice));
-  CUDA_CALL(cudaMemcpy(d_box, box, boxSize, cudaMemcpyHostToDevice));
-  CUDA_CALL(cudaMemcpy(d_boxDim, boxDim, boxDimSize, cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMemcpy(d_boxStart, boxStart, boxStartSize, cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMemcpy(d_belongsToBox, belongsToBox, belongsToBoxSize, cudaMemcpyHostToDevice));
 
-  *vParts = box;
-  *d_vParts = d_box;
-  *partsDim = boxDim;
-  *d_partsDim = d_boxDim;
+  *vPartsStart = boxStart;
+  *d_vPartsStart = d_boxStart;
   *vBelongsToBox = belongsToBox;
   *d_vBelongsToBox = d_belongsToBox;
     
   return 0;
 }
 
-int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, float ***vParts, float ***d_vParts,
-              int **partsDim, int **d_partsDim, size_t numberOfBlocks, size_t threadsPerBlock) {
+int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStart, int **d_vPartsStart,
+              size_t numberOfBlocks, size_t threadsPerBlock) {
 
   int *belongsToBox, *d_belongsToBox;
-  int ret = hashing3D(v,d_v,vSize,N,d,vParts,d_vParts,partsDim,d_partsDim,&belongsToBox,
+  int ret = hashing3D(v,d_v,vSize,N,d,vPartsStart,d_vPartsStart,&belongsToBox,
 		      &d_belongsToBox,numberOfBlocks,threadsPerBlock);
   CUDA_CALL(cudaFree(d_belongsToBox));
   free(belongsToBox);

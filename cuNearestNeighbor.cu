@@ -22,26 +22,28 @@
 // d3 is the d value cubed. AKA the number of the grids.
 
 __global__
-void cuNearestNeighbor(float **S, int *SDim, float *Q, int *checkQInBox, int d, float **neighbor) {
+void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int d, int *neighbor) {
 
   int proccess = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
 
-  int d3 = d*d*d;
+  // int d3 = d*d*d;
   int d2 = d*d;
-  float *q, *c, *nearestPoint;
-  float dx, dy, dz, distSqr, dist, nearestDist;
+  float invd = 1/(float)d;
+  float *q, *c;
+  float dx, dy, dz, distSqr, dist, nearestDist, gridX, gridY, gridZ;
   float sqrDx[3], sqrDy[3], sqrDz[3];
   sqrDx[0]=0; sqrDy[0]=0; sqrDz[0]=0;
-  int boxId, gridX, gridY, gridZ, temp;
+  int boxId, temp, nearestIdx;
 
 
-  for(int idx=proccess; idx<d3; idx+=stride) {
+  for(int idx=proccess; idx<NQ; idx+=stride) {
     q = Q+(DIM*idx);
     boxId = checkQInBox[idx];
     nearestDist = 1;        //This is HUGE!
-    for(int S_num=0; S_num<SDim[boxId]; S_num++){
-      c  = S[boxId] + (DIM * S_num);  //check distance of c anf q;
+    printf("q[%d]:%1.4f, %1.4f, %1.4f | Belongs to %d\n",idx,q[0],q[1],q[2],boxId);
+    for(int S_num=S[boxId]; S_num<S[boxId+1]; S_num+=3){
+      c = C+(S_num);
       dx = q[0] - c[0];
       dy = q[1] - c[1];
       dz = q[2] - c[2];
@@ -49,16 +51,16 @@ void cuNearestNeighbor(float **S, int *SDim, float *Q, int *checkQInBox, int d, 
       dist = sqrtf(distSqr);
       if(dist<nearestDist){
 	nearestDist = dist;
-	nearestPoint = c;
+	nearestIdx = S_num;
       } // !!Try two nops here as an else???
     } // end of for(int S_num=0; S_num<SDim[boxId]; S_num++)
-    neighbor[idx]=nearestPoint;
-
+    neighbor[idx]=nearestIdx;
+   
     // These are the XYZ coordinates of the grid
-    gridZ = boxId / d2;
+    gridZ = (boxId / d2) * invd;
     temp  = boxId % d2;
-    gridY = temp / d;
-    gridX = temp % d;
+    gridY = (temp / d) * invd;
+    gridX = (temp % d) * invd;
 
     // Now calculate the distance of the point from:
     // the 8 verteces of the grid cube
@@ -67,13 +69,13 @@ void cuNearestNeighbor(float **S, int *SDim, float *Q, int *checkQInBox, int d, 
 
     dx       = q[0] - gridX;
     sqrDx[1] = dx*dx;
-    sqrDx[2] = (d-dx)*(d-dx);
+    sqrDx[2] = (invd-dx)*(invd-dx);
     dy       = q[1] - gridY;
     sqrDy[1] = dy*dy;
-    sqrDy[2] = (d-dy)*(d-dy);
+    sqrDy[2] = (invd-dy)*(invd-dy);
     dz       = q[2] - gridZ;
     sqrDz[1] = dz*dz;
-    sqrDz[2] = (d-dz)*(d-dz);
+    sqrDz[2] = (invd-dz)*(invd-dz);
     // Reminder that sqrD(xyz)[0] = 0
       
     for(int zi=0; zi<3; zi++){
