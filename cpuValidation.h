@@ -10,6 +10,6 @@
 #ifndef CPUVALIDATION_H
 #define CPUVALIDATION_H
 
-void cpuValidation(float *Q, int NQ, float *C, int NC, float **results)
+void cpuValidation(float *Q, int NQ, float *C, int NC, int *results)
 
 #endif /* CPUVALIDATION_H */

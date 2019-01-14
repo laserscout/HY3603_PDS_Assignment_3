@@ -8,10 +8,10 @@
  *
  **********************************************************************/
 
-void cpuValidation(float *Q, int NQ, float *C, int NC, float **results)
+void cpuValidation(float *Q, int NQ, float *C, int NC, int *results)
 {
 	float NNdist, dist;
-	float *NN;
+	int NNidx;
 
 	float xQ, yQ, zQ;
 	float xC, yC, zC;
@@ -33,12 +33,15 @@ void cpuValidation(float *Q, int NQ, float *C, int NC, float **results)
 
 			if(dist<NNdist) {
 			  NNdist = dist;
-			  *NN = &C[j * DIM];
+			  NNidx = j;
 			}			
 		}
 
-		if(results[i] != NN)
+		if(results[i] != NNidx) {
+
 			printf("! ! ! VALIDATION FAILED ! ! !\non Q point: (%1.4f, %1.4f, %1.4f)\n", xQ, yQ, zQ);
+			printf("algorithm found %d as the NN, while in fact it was %d.\n", results[i], NNidx);
+		}
 
 	}
 }
