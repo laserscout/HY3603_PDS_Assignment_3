@@ -27,7 +27,7 @@ CUDAPATH = /usr/local/cuda
 CFLAGS = -c -I $(CUDAPATH)/include
 NVCCFLAGS = -c -I $(CUDAPATH)/include -Wno-deprecated-gpu-targets
 
-LFLAGS = -L$(CUDAPATH)/lib -lcuda -lcurand -Wno-deprecated-gpu-targets
+LFLAGS = -L$(CUDAPATH)/lib -lcuda -lcurand -Wno-deprecated-gpu-targets -ftz=true #here of above?
 
 all: build run
 
@@ -46,4 +46,4 @@ clean:
 	rm *.o
 
 run:
-	./$(PROJECT_NAME) 3 3 3
+	./$(PROJECT_NAME) 5 2 1
