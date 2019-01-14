@@ -13,11 +13,8 @@
 //#include "cuNearestNeighborHelper.h"
 #include "cuRandFloat.h"
 #include "hashing3D.h"
-<<<<<<< HEAD
 #include "cpuValidation.h"
-=======
 #include "cuNearestNeighbor.h"
->>>>>>> master
 
 #define DIM 3
 

@@ -7,6 +7,9 @@
  * John Flionis <iflionis@auth.gr>
  *
  **********************************************************************/
+#include "cpuValidation.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 void cpuValidation(float *Q, int NQ, float *C, int NC, int *results)
 {

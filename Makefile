@@ -39,8 +39,8 @@ gpu:
 
 # Try and fix this later so that if a .c file doesn't exist, skip
 # the call to gcc.
-#cpu:			
-#	$(CC) $(CFLAGS) *.c
+cpu:			
+	$(CC) $(CFLAGS) *.c
 
 clean:
 	rm *.o
