@@ -17,6 +17,10 @@
 
 #define DIM 3
 
+__constant__ int *d_tensorVector0;
+__constant__ int *d_tensorVector1;
+__constant__ int *d_tensorVector2;
+
 int main (int argc, char *argv[]) {
 
   float *Q, *C, *d_Q, *d_C;
@@ -48,6 +52,14 @@ int main (int argc, char *argv[]) {
   multiP = props.multiProcessorCount;
   threadsPerBlock = 8*warp;
   numberOfBlocks  = 5*multiP;
+
+  int tensorVector0 = {(-1), 		0, (+1)};
+  int tensorVector1 = {(-1)*d, 	0, (+1)*d};
+  int tensorVector2 = {(-1)*d*d, 	0, (+1)*d*d};
+
+  cudaMemcpyToSymbol(d_tensorVector0, tensorVector0, 3 * sizeof(int));
+  cudaMemcpyToSymbol(d_tensorVector1, tensorVector1, 3 * sizeof(int));
+  cudaMemcpyToSymbol(d_tensorVector2, tensorVector2, 3 * sizeof(int));
 
   randFloat(&Q, &d_Q, NQ);
   QSize = DIM * NQ * sizeof(float);
@@ -95,8 +107,10 @@ int main (int argc, char *argv[]) {
       }
   }
 
-  int *neighbor, *checkOutside, *d_neighbor, *d_checkOutside;
+  int *neighbor, *d_neighbor;
+  char *d_checkOutside;
   size_t neighborSize = NQ * sizeof(int);
+  size_t checkOutsideSize = NQ * sizeof(char);
   
   CUDA_CALL(cudaMalloc(&d_neighbor,neighborSize));
   neighbor = (int *)malloc(neighborSize);
@@ -105,12 +119,7 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
-  CUDA_CALL(cudaMalloc(&d_checkOutside,neighborSize));
-  checkOutside = (int *)malloc(neighborSize);
-  if(d_checkOutside == NULL) {
-    printf("Error allocating checkOutside");
-    exit(1);
-  }
+  CUDA_CALL(cudaMalloc(&d_checkOutside,checkOutsideSize));
 
   cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
@@ -123,9 +132,8 @@ int main (int argc, char *argv[]) {
   CUDA_CALL(cudaDeviceSynchronize());
 
   CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
-  CUDA_CALL(cudaMemcpy(checkOutside, d_checkOutside, neighborSize, cudaMemcpyDeviceToHost));
-
-  cuNearestNeighbor2ndPass<<<numberOfBlocks*10, 26>>>
+  
+  cuNearestNeighbor2ndPass<<<numberOfBlocks*10, 27>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
 
   printf(" ==== Neighbors! ==== \n");

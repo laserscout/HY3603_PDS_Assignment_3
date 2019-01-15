@@ -22,7 +22,7 @@
 // d3 is the d value cubed. AKA the number of the grids.
 
 __global__
-void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int d, int *neighbor,int *checkOutside) {
+void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int d, int *neighbor, char *checkOutside) {
 
   int proccess = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;

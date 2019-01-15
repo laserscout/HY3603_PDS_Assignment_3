@@ -24,18 +24,18 @@
 __global__
 void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQInBox, int d, int *neighbor, int *checkOutside) {
 
-  __shared__ float total_nearestDist;
-  __shared__ int total_nearestIdx;
+  __shared__ float total_nearestDist = 1.000000;
+  __shared__ int total_nearestIdx = -1;
 
-  int boxIdToCheck;
+  int boxIdToCheck = 0;
   int proccess =  blockIdx.x;
   int stride = gridDim.x;
 
-  // int d3 = d*d*d;
+  int d3 = d*d*d;
   int d2 = d*d;
   float invd = 1/(float)d;
   float *q, *c;
-  float dx, dy, dz, distSqr, dist, nearestDist, gridX, gridY, gridZ;
+  float dx, dy, dz, distSqr, dist, nearestDist;
   int boxId, temp, nearestIdx;
 
 
@@ -46,30 +46,14 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
       nearestDist = 1;        //This is HUGE!
       printf("q[%d]:%1.4f, %1.4f, %1.4f | Belongs to %d\n",idx,q[0],q[1],q[2],boxId);
 
-      // Calculate boxIdToCheck through threadIdx.x
-      gridZ = (boxId / d2) * invd;
-      temp  = boxId % d2;
-      gridY = (temp / d) * invd;
-      gridX = (temp % d) * invd;
+      // Calculate the boxIdToCheck of each thread, depending on its Idx
+      int div9 = (int)threadIdx.x/9;
+      int mod9 = (int)threadIdx.x%9;
+      int div3 = (int)mod9/3;
+      int mod3 = (int)mod9%3;
+      boxIdToCheck = boxId + d_tensorVector0[mod3] + d_tensorVector1[div3] + d_tensorVector2[div9]; 
 
-      if(gridZ==0)
-        // Exclude Searching Downwards
-      else if(gridZ==d-1)
-        // Exclude Searching Upwards
-
-      if(gridY==0)
-        // Exclude Searching Left
-      else if(gridY==d-1)
-        // Exclude Searching Right
-
-      if(gridX==0)
-        // Exclude Searching Backwards
-      else if(gridX==d-1)
-        // Exclude Searching Frontwards
-
-
-
-      if(boxIdToCheck != -1) {
+      if(boxIdToCheck < d3 && boxIdToCheck >=0) {
         for(int S_num=S[boxIdToCheck]; S_num<S[boxIdToCheck+1]; S_num+=3){
           c = C+(S_num);
           dx = q[0] - c[0];
@@ -88,6 +72,10 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
           atomicExch(&total_nearestIdx, nearestIdx);
         }
       }
-    }      
+      
+      if(threadIdx.x==13)
+        neighbor[idx] = total_nearestIdx;  
+    }        
   } // end of  for(int P_num=0; P_num<P_size[i]; P_num++)
+
 }
