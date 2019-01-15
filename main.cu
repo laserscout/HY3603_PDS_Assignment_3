@@ -101,7 +101,7 @@ int main (int argc, char *argv[]) {
     }
     printf(" ======S vector====== \n");
     for(int boxid=0;boxid<d*d*d;boxid++){
-      SDim = (S[boxid+1]-S[boxid])/3;
+      SDim = S[boxid+1]-S[boxid];
       printf("Box%d size=%d\n", boxid, SDim);
       for(int i = 0; i < SDim ; i++){
         for (int d=0; d<DIM; d++)
