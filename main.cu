@@ -96,6 +96,14 @@ int main (int argc, char *argv[]) {
     }
   }
 
+  cudaEvent_t startOfHashing, startOfFirstRun, startOfSecondRun, stop;
+  cudaEventCreate(&startOfHashing);
+  cudaEventCreate(&startOfFirstRun);
+  cudaEventCreate(&startOfSecondRun);
+  cudaEventCreate(&stop);
+
+  cudaEventRecord(startOfHashing);
+
   // Hashing C into d*d*d boxes
   hashing3D(C, d_C, CSize, NC, d, &S, &d_S, numberOfBlocks, threadsPerBlock);
 
@@ -124,6 +132,8 @@ int main (int argc, char *argv[]) {
     }
   }
 
+  cudaEventRecord(startOfFirstRun);
+
   int *neighbor, *d_neighbor;
   char *d_checkOutside;
   size_t neighborSize = NQ * sizeof(int);
@@ -137,9 +147,13 @@ int main (int argc, char *argv[]) {
   }
 
   CUDA_CALL(cudaMalloc(&d_checkOutside,checkOutsideSize));
+  
+  cudaEventRecord(startOfSecondRun);
 
   cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
+
+  cudaEventRecord(stop);
 
   err = cudaGetLastError();
   if (err != cudaSuccess) {
@@ -149,6 +163,18 @@ int main (int argc, char *argv[]) {
   }
   
   CUDA_CALL(cudaDeviceSynchronize());
+    
+  cudaEventSynchronize(stop);
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, startOfHashing, startOfFirstRun);
+  printf("Duration of Q and C hashing: %1.6fms\n",milliseconds);
+  milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, startOfFirstRun, startOfSecondRun);
+  printf("Duration of the first run of the kernel: %1.6fms\n",milliseconds);
+  milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, startOfSecondRun, stop);
+  printf("Duration of the second run of the kernel: %1.6fms\n",milliseconds);
+
 
   CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
   
