@@ -143,7 +143,7 @@ int main (int argc, char *argv[]) {
   }
 
   /* Validating the NN results */
-  cpuValidation(Q, NQ, C, NC, neighbor);
+  cpuValidation(Q, NQ, C, NC, neighbor, verboseFlag);
   
   /* Cleanup */
   CUDA_CALL(cudaFree(d_Q));
