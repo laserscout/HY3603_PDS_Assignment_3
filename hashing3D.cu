@@ -63,7 +63,7 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStar
     exit(1);
   }
   
-  printf("tr:%zu, bl:%zu\n",threadsPerBlock, numberOfBlocks);
+  // printf("tr:%zu, bl:%zu\n",threadsPerBlock, numberOfBlocks);
 
   cuFindBelongsToBox<<<threadsPerBlock, numberOfBlocks>>>
     (d_v, N, d, d_belongsToBox);
