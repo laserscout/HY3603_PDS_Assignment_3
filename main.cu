@@ -116,9 +116,9 @@ int main (int argc, char *argv[]) {
     for(int boxid=0;boxid<d*d*d;boxid++){
       SDim = S[boxid+1]-S[boxid];
       printf("Box%d size=%d\n", boxid, SDim);
-      for(int i = 0; i < SDim ; i++){
+      for(int i = S[boxid] ; i < S[boxid+1] ; i++){
         for (int d=0; d<DIM; d++)
-          printf("%1.4f ", C[ S[boxid] +i*DIM +d ]);
+          printf("%1.4f ", C[ i*DIM +d ]);
         printf("\n");
       }
     }
@@ -147,11 +147,23 @@ int main (int argc, char *argv[]) {
              __FILE__,__LINE__);
       return EXIT_FAILURE;
   }
-  // Synchronization is already provided by cudaMemcpy
-  //CUDA_CALL(cudaDeviceSynchronize());
+  
+  CUDA_CALL(cudaDeviceSynchronize());
 
   CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
   
+  if(verboseFlag == 1) {
+    printf(" ==== Neighbors! ==== \n");
+    for(int i = 0; i < NQ ; i++){
+      for (int d=0; d<DIM; d++)
+	printf("%1.4f ", Q[i*DIM+d]);
+      printf("-> ");
+      for (int d=0; d<DIM; d++)
+	printf("%1.4f ", C[neighbor[i]*DIM+d]);
+      printf("\n");
+    }
+  }
+
   cuNearestNeighbor2ndPass<<<numberOfBlocks*10, 27>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
 

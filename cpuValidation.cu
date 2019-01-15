@@ -50,7 +50,10 @@ int cpuValidation(float *Q, int NQ, float *C, int NC, int *results, char verbose
     if(results[i] != NNidx) {
       printf("     ! ! ! VALIDATION FAILED ! ! !\n");
       printf("-> On Q[%d]: (%1.4f, %1.4f, %1.4f)\n",i, xQ, yQ, zQ);
-      printf("Algorithm found C[%d] as the NN, while in fact it was C[%d].\n\n", results[i], NNidx);
+      printf("Algorithm found C[%d] as the NN, while in fact it was C[%d].\n", results[i], NNidx);
+      printf("      (%1.4f, %1.4f, %1.4f)                 (%1.4f, %1.4f, %1.4f)\n\n",
+	     C[results[i]*DIM],C[results[i]*DIM+1],C[results[i]*DIM+2],
+	     C[NNidx*DIM],C[NNidx*DIM+1],C[NNidx*DIM+2]);
       flag = 1;
       if(verboseFlag==0)
 	return flag;
