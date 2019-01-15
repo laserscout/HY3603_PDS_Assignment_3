@@ -66,11 +66,11 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
       int mod3 = (int)mod9%3;
       boxIdToCheck = boxId + oneOone[mod3] + d*oneOone[div3] + d2*oneOone[div9]; 
 
-      printf(">Q[%d] checking in box %d\n",idx,boxIdToCheck);
+      // printf(">Q[%d] checking in box %d\n",idx,boxIdToCheck);
 
       if(boxIdToCheck < d3 && boxIdToCheck >=0) {
-        for(int S_num=S[boxIdToCheck]; S_num<S[boxIdToCheck+1]; S_num+=3){
-          c = C+(S_num);
+        for(int S_num=S[boxIdToCheck]; S_num<S[boxIdToCheck+1]; S_num++){
+          c = C+(S_num*DIM);
           dx = q[0] - c[0];
           dy = q[1] - c[1];
           dz = q[2] - c[2];
@@ -99,7 +99,7 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
 	}
       }
       neighbor[idx] = nearestIdx;
-      printf(">>>Q[%d] > C[%d]\n",idx,nearestIdx);
+      // printf(">>>Q[%d] > C[%d]\n",idx,nearestIdx);
 
       // if(threadIdx.x==13)
       //   neighbor[idx] = total_nearestIdx;  
