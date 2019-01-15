@@ -19,6 +19,9 @@
 #define AEM 8263-6698
 #define DIM 3
 
+__global__
+void cuOneToZero(float *data, int N);
+
 int randFloat(float **out, float **d_out, int size)
 {
     size_t n = DIM*size;
@@ -53,8 +56,18 @@ int randFloat(float **out, float **d_out, int size)
        this assignment, that's why i kept it. Normal rand from the CPU
        is the better opption here */
 
+    int deviceId;
+    cudaDeviceProp props;
+    cudaGetDevice(&deviceId);
+    cudaGetDeviceProperties(&props, deviceId);
+    size_t threadsPerBlock = 8*props.warpSize;
+    size_t numberOfBlocks  = 5*props.multiProcessorCount;
+
+    cuOneToZero<<<threadsPerBlock, numberOfBlocks>>>(d_data,n);
+
     /* Copy device memory to host */
     CUDA_CALL(cudaMemcpy(data, d_data, dataSize, cudaMemcpyDeviceToHost));
+
 
     offset += n;
     *d_out = d_data;
@@ -62,4 +75,16 @@ int randFloat(float **out, float **d_out, int size)
 
     CURAND_CALL(curandDestroyGenerator(gen));
     return EXIT_SUCCESS;
+}
+
+__global__
+void cuOneToZero(float *data, int N) {
+
+  int process = threadIdx.x + blockIdx.x * blockDim.x;
+  int stride = blockDim.x * gridDim.x;
+  
+  for(int i=process; i<N; i+=stride)
+    if(data[i] == 1)
+      data[i] = 0;
+
 }
