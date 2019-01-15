@@ -14,12 +14,13 @@
 #include "cuRandFloat.h"
 #include "hashing3D.h"
 #include "cuNearestNeighbor.h"
+#include "cuNearestNeighbor2ndPass.h"
 
 #define DIM 3
 
-__constant__ int *d_tensorVector0;
-__constant__ int *d_tensorVector1;
-__constant__ int *d_tensorVector2;
+__constant__ int d_tensorVector0[3];
+__constant__ int d_tensorVector1[3];
+__constant__ int d_tensorVector2[3];
 
 int main (int argc, char *argv[]) {
 
@@ -53,9 +54,9 @@ int main (int argc, char *argv[]) {
   threadsPerBlock = 8*warp;
   numberOfBlocks  = 5*multiP;
 
-  int tensorVector0 = {(-1), 		0, (+1)};
-  int tensorVector1 = {(-1)*d, 	0, (+1)*d};
-  int tensorVector2 = {(-1)*d*d, 	0, (+1)*d*d};
+  int tensorVector0[3] = {(-1)	  , 0, (+1)};
+  int tensorVector1[3] = {(-1)*d  , 0, (+1)*d};
+  int tensorVector2[3] = {(-1)*d*d, 0, (+1)*d*d};
 
   cudaMemcpyToSymbol(d_tensorVector0, tensorVector0, 3 * sizeof(int));
   cudaMemcpyToSymbol(d_tensorVector1, tensorVector1, 3 * sizeof(int));
@@ -123,19 +124,30 @@ int main (int argc, char *argv[]) {
 
   cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
+
   err = cudaGetLastError();
   if (err != cudaSuccess) {
       printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
              __FILE__,__LINE__);
       return EXIT_FAILURE;
   }
-  CUDA_CALL(cudaDeviceSynchronize());
+  // Synchronization is already provided by cudaMemcpy
+  //CUDA_CALL(cudaDeviceSynchronize());
 
   CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
   
   cuNearestNeighbor2ndPass<<<numberOfBlocks*10, 27>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
 
+  err = cudaGetLastError();
+  if (err != cudaSuccess) {
+      printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
+             __FILE__,__LINE__);
+      return EXIT_FAILURE;
+  }
+
+  CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
+  
   printf(" ==== Neighbors! ==== \n");
   for(int i = 0; i < NQ ; i++){
     for (int d=0; d<DIM; d++)
