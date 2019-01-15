@@ -63,7 +63,7 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStar
     exit(1);
   }
   
-  printf("tr:%zu, bl:%zu\n",threadsPerBlock, numberOfBlocks);
+  // printf("tr:%zu, bl:%zu\n",threadsPerBlock, numberOfBlocks);
 
   cuFindBelongsToBox<<<threadsPerBlock, numberOfBlocks>>>
     (d_v, N, d, d_belongsToBox);
@@ -80,7 +80,7 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStar
 
   position = 0;
   for(int boxId=0; boxId<d3; boxId++){
-    boxStart[boxId] = DIM*position;
+    boxStart[boxId] = position;
     for(int n=position; n<N; n++){
       if(belongsToBox[n] == boxId) {
 	tempX             = v[DIM*position];
@@ -99,7 +99,7 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStar
       }
     }
   }
-  boxStart[d3]=DIM*N;
+  boxStart[d3]=N;
 
   CUDA_CALL(cudaMemcpy(d_v, v, vSize, cudaMemcpyHostToDevice));
   CUDA_CALL(cudaMemcpy(d_boxStart, boxStart, boxStartSize, cudaMemcpyHostToDevice));
