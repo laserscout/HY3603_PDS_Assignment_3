@@ -41,7 +41,7 @@ void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int
     q = Q+(DIM*idx);
     boxId = checkQInBox[idx];
     nearestDist = 1;        //This is HUGE!
-    // printf("q[%d]:%1.4f, %1.4f, %1.4f | Belongs to %d\n",idx,q[0],q[1],q[2],boxId);
+    printf("q[%d]:%1.4f, %1.4f, %1.4f | Belongs to %d\n",idx,q[0],q[1],q[2],boxId);
     for(int S_num=S[boxId]; S_num<S[boxId+1]; S_num++){
       c = C+(S_num*DIM);
       dx = q[0] - c[0];
