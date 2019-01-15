@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda.h>
-//#include "cuNearestNeighborHelper.h"
 #include "cuRandFloat.h"
 #include "hashing3D.h"
+#include "cpuValidation.h"
 #include "cuNearestNeighbor.h"
 
 #define DIM 3
@@ -127,6 +127,9 @@ int main (int argc, char *argv[]) {
     printf("\n");
   }
 
+  /* Validating the NN results */
+  cpuValidation(Q, NQ, C, NC, neighbor);
+  
   /* Cleanup */
   CUDA_CALL(cudaFree(d_Q));
   CUDA_CALL(cudaFree(d_C));
