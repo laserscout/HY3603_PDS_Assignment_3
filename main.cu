@@ -29,20 +29,23 @@ int main (int argc, char *argv[]) {
   char verboseFlag = 0;
 
   if (argc < 4) {
-    printf("Usage: %s arg1 arg2 arg3\n  where NC=2^arg1, NQ=2^arg2 and d=2^arg3\n",
+    printf("Usage: %s [flags] arg1 arg2 arg3\n  where NC=2^arg1, NQ=2^arg2 and d=2^arg3\n",
 	   argv[0]);
     exit(1);
   }
 
-  NC = 1<<atoi(argv[1]);
-  NQ = 1<<atoi(argv[2]);
-  d  = 1<<atoi(argv[3]);
-
-  for(int i=0; i<argc; i++) {
+  for(int i=1; i<argc; i++) {
     if (strcmp(argv[i], "-v") == 0)
       {                 
         verboseFlag = 1; // use only with small NC NQ and d
       }
+    if (strncmp(argv[i], "-", 1) != 0) {
+      NC = 1<<atoi(argv[i]);
+      NQ = 1<<atoi(argv[i+1]);
+      d  = 1<<atoi(argv[i+2]);
+      break;
+    }
+      
   }
   
   size_t threadsPerBlock, warp;
@@ -137,7 +140,7 @@ int main (int argc, char *argv[]) {
 	printf("%1.4f ", Q[i*DIM+d]);
       printf("-> ");
       for (int d=0; d<DIM; d++)
-	printf("%1.4f ", C[neighbor[i]+d]);
+	printf("%1.4f ", C[neighbor[i]*DIM+d]);
       printf("\n");
     }
   }

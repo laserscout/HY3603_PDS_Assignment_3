@@ -47,10 +47,10 @@ int cpuValidation(float *Q, int NQ, float *C, int NC, int *results, char verbose
       }			
     } // End of going through all C for the one q
 
-    if(results[i]/3 != NNidx) {
+    if(results[i] != NNidx) {
       printf("     ! ! ! VALIDATION FAILED ! ! !\n");
       printf("-> On Q[%d]: (%1.4f, %1.4f, %1.4f)\n",i, xQ, yQ, zQ);
-      printf("Algorithm found C[%d] as the NN, while in fact it was C[%d].\n\n", results[i]/3, NNidx);
+      printf("Algorithm found C[%d] as the NN, while in fact it was C[%d].\n\n", results[i], NNidx);
       flag = 1;
       if(verboseFlag==0)
 	return flag;
@@ -59,7 +59,7 @@ int cpuValidation(float *Q, int NQ, float *C, int NC, int *results, char verbose
   } // End of going through all Q;
 
   if(verboseFlag==0) // If it reached here with the verbose flag then it hasn't retunred 1 (look 3 lines up)
-    printf("     ! ! ! VALIDATION SUCCEEDED ! ! !\n\n");
+    printf("     ! ! ! VALIDATION SUCCEEDED ! ! !\n\n"); 1
       
   return flag;
 }
