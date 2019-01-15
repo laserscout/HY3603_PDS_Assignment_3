@@ -32,6 +32,7 @@ int main (int argc, char *argv[]) {
   int SDim;
   cudaError_t err;
   char verboseFlag = 0;
+  char noValidationFlag = 0;
 
   if (argc < 4) {
     printf("Usage: %s [flags] arg1 arg2 arg3\n  where NC=2^arg1, NQ=2^arg2 and d=2^arg3\n",
@@ -43,6 +44,10 @@ int main (int argc, char *argv[]) {
     if (strcmp(argv[i], "-v") == 0)
       {                 
         verboseFlag = 1; // use only with small NC NQ and d
+      }
+    if (strcmp(argv[i], "--novalidation") == 0)
+      {                 
+        noValidationFlag = 1; // Do not run the slow validation in the end
       }
     if (strncmp(argv[i], "-", 1) != 0) {
       NC = 1<<atoi(argv[i]);
@@ -200,7 +205,7 @@ int main (int argc, char *argv[]) {
       return EXIT_FAILURE;
   }
 
-  CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
+  
   
   if(verboseFlag == 1) {
     printf(" ==== Neighbors! ==== \n");
@@ -214,8 +219,11 @@ int main (int argc, char *argv[]) {
     }
   }
 
-  /* Validating the NN results */
-  cpuValidation(Q, NQ, C, NC, neighbor, verboseFlag);
+  if(noValidationFlag==0) {
+    CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
+    /* Validating the NN results */
+    cpuValidation(Q, NQ, C, NC, neighbor, verboseFlag);
+  }
   
   /* Cleanup */
   CUDA_CALL(cudaFree(d_Q));
