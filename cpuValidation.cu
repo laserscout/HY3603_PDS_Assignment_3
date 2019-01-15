@@ -21,6 +21,8 @@ void cpuValidation(float *Q, int NQ, float *C, int NC, int *results)
 
 	float xQ, yQ, zQ;
 	float xC, yC, zC;
+    
+    printf("\n\n ====== Begining validation of results ======\n\n");
 
 	for(int i = 0; i < NQ; i++) {
 		NNdist=1.000000;
@@ -43,11 +45,13 @@ void cpuValidation(float *Q, int NQ, float *C, int NC, int *results)
 			}			
 		}
 
-		if(results[i] != NNidx) {
+		if(results[i]/3 != NNidx) {
 
-			printf("! ! ! VALIDATION FAILED ! ! !\non Q point: (%1.4f, %1.4f, %1.4f)\n", xQ, yQ, zQ);
-			printf("algorithm found %d as the NN, while in fact it was %d.\n", results[i], NNidx);
+			printf("     ! ! ! VALIDATION FAILED ! ! !\n");
+            printf("-> On Q[%d]: (%1.4f, %1.4f, %1.4f)\n",i, xQ, yQ, zQ);
+			printf("Algorithm found C[%d] as the NN, while in fact it was C[%d].\n\n", results[i]/3, NNidx);
 		}
 
 	}
+    printf("\n");
 }
