@@ -21,9 +21,6 @@ CC = gcc
 
 CUDAPATH = /usr/local/cuda
 
-# note that nvcc defaults to 32-bit architecture. thus, force C/LFLAGS to comply.
-# you could also force nvcc to compile 64-bit with -m64 flag. (and remove -m32 instances)
-
 CFLAGS = -c -I $(CUDAPATH)/include
 NVCCFLAGS = -c -I $(CUDAPATH)/include -Wno-deprecated-gpu-targets
 
@@ -39,11 +36,12 @@ gpu:
 
 # Try and fix this later so that if a .c file doesn't exist, skip
 # the call to gcc.
-cpu:			
-	$(CC) $(CFLAGS) *.c
+#cpu:			
+#	$(CC) $(CFLAGS) *.c
 
 clean:
 	rm *.o
 
 run:
 	./$(PROJECT_NAME) 5 2 1
+

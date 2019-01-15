@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda.h>
-//#include "cuNearestNeighborHelper.h"
 #include "cuRandFloat.h"
 #include "hashing3D.h"
 #include "cpuValidation.h"

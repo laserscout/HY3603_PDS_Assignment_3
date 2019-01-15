@@ -10,6 +10,9 @@
 #include "cpuValidation.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
+#define DIM 3
 
 void cpuValidation(float *Q, int NQ, float *C, int NC, int *results)
 {
