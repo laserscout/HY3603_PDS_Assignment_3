@@ -15,7 +15,7 @@
 #include <stdlib.h>
 
 __global__
-void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int d, int *neighbor);
+void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int d, int *neighbor, int *checkOutside);
 
 
 #endif /* CU_NEAREST_NEIGHBOR_H */

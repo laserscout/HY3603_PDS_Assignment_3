@@ -95,7 +95,7 @@ int main (int argc, char *argv[]) {
       }
   }
 
-  int *neighbor, *d_neighbor;
+  int *neighbor, *checkOutside, *d_neighbor, *d_checkOutside;
   size_t neighborSize = NQ * sizeof(int);
   
   CUDA_CALL(cudaMalloc(&d_neighbor,neighborSize));
@@ -105,8 +105,15 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
+  CUDA_CALL(cudaMalloc(&d_checkOutside,neighborSize));
+  checkOutside = (int *)malloc(neighborSize);
+  if(d_checkOutside == NULL) {
+    printf("Error allocating checkOutside");
+    exit(1);
+  }
+
   cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>
-    (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor);
+    (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
   err = cudaGetLastError();
   if (err != cudaSuccess) {
       printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
@@ -116,6 +123,10 @@ int main (int argc, char *argv[]) {
   CUDA_CALL(cudaDeviceSynchronize());
 
   CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
+  CUDA_CALL(cudaMemcpy(checkOutside, d_checkOutside, neighborSize, cudaMemcpyDeviceToHost));
+
+  cuNearestNeighbor2ndPass<<<numberOfBlocks*10, 26>>>
+    (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
 
   printf(" ==== Neighbors! ==== \n");
   for(int i = 0; i < NQ ; i++){

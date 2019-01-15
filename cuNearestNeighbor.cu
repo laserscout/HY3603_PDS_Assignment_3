@@ -22,7 +22,7 @@
 // d3 is the d value cubed. AKA the number of the grids.
 
 __global__
-void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int d, int *neighbor) {
+void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int d, int *neighbor,int *checkOutside) {
 
   int proccess = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
@@ -32,8 +32,6 @@ void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int
   float invd = 1/(float)d;
   float *q, *c;
   float dx, dy, dz, distSqr, dist, nearestDist, gridX, gridY, gridZ;
-  float sqrDx[3], sqrDy[3], sqrDz[3];
-  sqrDx[0]=0; sqrDy[0]=0; sqrDz[0]=0;
   int boxId, temp, nearestIdx;
 
 
@@ -50,8 +48,8 @@ void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int
       distSqr = dx*dx + dy*dy + dz*dz + SOFTENING;
       dist = sqrtf(distSqr);
       if(dist<nearestDist){
-	nearestDist = dist;
-	nearestIdx = S_num;
+      	nearestDist = dist;
+      	nearestIdx = S_num;
       } // !!Try two nops here as an else???
     } // end of for(int S_num=0; S_num<SDim[boxId]; S_num++)
     neighbor[idx]=nearestIdx;
@@ -66,54 +64,16 @@ void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int
     // the 8 verteces of the grid cube
     // the 12 edges
     // and the 6 faces
-
-    dx       = q[0] - gridX;
-    sqrDx[1] = dx*dx;
-    sqrDx[2] = (invd-dx)*(invd-dx);
-    dy       = q[1] - gridY;
-    sqrDy[1] = dy*dy;
-    sqrDy[2] = (invd-dy)*(invd-dy);
-    dz       = q[2] - gridZ;
-    sqrDz[1] = dz*dz;
-    sqrDz[2] = (invd-dz)*(invd-dz);
-    // Reminder that sqrD(xyz)[0] = 0
-      
-    for(int zi=0; zi<3; zi++){
-      for(int yi=0; yi<3; yi++){
-	for(int xi=0; xi<3; xi++){
-	  distSqr = sqrDx[xi] + sqrDy[yi] + sqrDz[zi];
-	  //cbrtf(distSqr);
-	}
-      }
-    }
+    dx = q[0] - gridX;
+    dy = q[1] - gridY;
+    dz = q[2] - gridZ;
+    
+    if( (dx<nearestDist || d-dx<nearestDist) ||
+          (dy<nearestDist || d-dy<nearestDist) ||
+            (dz<nearestDist || d-dz<nearestDist)  )
+      checkOutside[idx]=1;
+    else
+      checkOutside[idx]=0;      
       
   } // end of  for(int P_num=0; P_num<P_size[i]; P_num++)
 }
-
-// if(dx<nearestDist) { // It's near the left side x face
-//   //code
-//   if(cbrtf(dx*dx+dy*dy)<nearestDist) { // left x, bottom y edge
-//     //code
-//   }
-//   else if(cbrtf(dx*dx+
-// 		}
-// 	  else if(d-dx<nearestDist) { // It's near the right side x face
-// 	  }
-      
-// 	  if(dy<nearestDist) { // Left y face
-// 	  }
-// 	  else if(d-dy<nearestDist) { // Right y face
-// 	  }
-      
-// 	  if(dz<nearestDist) { // Left z face
-// 	  }
-// 	  else if(d-dz<nearestDist) { // Right z face
-// 	  }
-
-// S[boxid][i][0,1,2]
-
-// // secont way
-
-// S_acutal[boxid][3*i+"0, 1, 2"]
-
-// S[ 3*( boxid*S_size[boxid] + i ) + "0,1,2"]
