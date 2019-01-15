@@ -58,8 +58,8 @@ int cpuValidation(float *Q, int NQ, float *C, int NC, int *results, char verbose
 
   } // End of going through all Q;
 
-  if(verboseFlag==0){ // If it reached here with the verbose flag then it hasn't retunred 1 (look 3 lines up)
-    printf("     ! ! ! VALIDATION SUCCEEDED ! ! !\n\n")
+  if(verboseFlag==0) // If it reached here with the verbose flag then it hasn't retunred 1 (look 3 lines up)
+    printf("     ! ! ! VALIDATION SUCCEEDED ! ! !\n\n");
       
   return flag;
 }
