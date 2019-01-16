@@ -98,11 +98,11 @@ int main (int argc, char *argv[]) {
   cudaEventRecord(startOfHashing);
 
   // Hashing C into d*d*d boxes
-  hashing3D(C, d_C, CSize, NC, d, &S, &d_S, 
+  hashing3D(C, &d_C, CSize, NC, d, &S, &d_S, 
   		numberOfBlocks, threadsPerBlock);
 
   int *QBoxIdToCheck, *d_QBoxIdToCheck;
-  hashing3D(Q, d_Q, QSize, NQ, d, &P, &d_P, &QBoxIdToCheck, &d_QBoxIdToCheck,
+  hashing3D(Q, &d_Q, QSize, NQ, d, &P, &d_P, &QBoxIdToCheck, &d_QBoxIdToCheck,
 	    numberOfBlocks, threadsPerBlock);
 
   if(verboseFlag == 1){

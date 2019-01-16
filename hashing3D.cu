@@ -14,6 +14,23 @@
 
 #define DIM 3
 
+void cumsum(int *array, int index) {
+    if(index <= 0) return;
+    cumsum(array, index -1);
+    array[index] += array[index - 1];
+}
+
+__global__
+void cuInitBoxCount(int *d_boxCount, int n) {
+
+  int process = threadIdx.x + blockIdx.x * blockDim.x;
+  int stride = blockDim.x * gridDim.x;
+
+  for(int i=process; i<n; i+=stride){
+    d_boxCount[i]=0;
+  }
+}
+
 __global__
 void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox, int *positionWithinBox, int *boxSize){
 
@@ -23,11 +40,6 @@ void cuFindBelongsToBox (float *v, int N, int d, int *belongsToBox, int *positio
   int d2 = d * d;
   int d3 = d * d * d;
   float x, y, z;
-
-  for(int n=process; n<d3; n+=stride)
-  	  boxSize[n]=0;
-
-  __syncthreads();
 
   for(int n=process; n<N; n+=stride){
       x = v[n*DIM];
@@ -53,7 +65,7 @@ void cuPrefixSum (int *array, int size){
   // AS IS, IT WON'T WORK FOR d > 3
   if(size>1024) printf("size>1024: PROBLEM\n");
 
-if (process<size/2) {
+	if (process<size/2) {
 	  temp[2*process]   = array[2*process];
 	  temp[2*process+1] = array[2*process+1];
 
@@ -104,7 +116,7 @@ if (process<size/2) {
 }
 
 __global__
-void cuRearrangeV (float *v, int N, int d, int *belongsToBox, int *positionWithinBox, int *boxStart){
+void cuRearrangeV (float *v, float *newV, int N, int d, int *belongsToBox, int *newBelongsToBox, int *positionWithinBox, int *boxStart){
 
   int process = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
@@ -113,28 +125,31 @@ void cuRearrangeV (float *v, int N, int d, int *belongsToBox, int *positionWithi
 
   for(int n=process; n<N; n+=stride){
     position   = boxStart[belongsToBox[n]] + positionWithinBox[n];
-    v[DIM*n]   = atomicExch( &v[DIM*position], v[DIM*n]);
-    v[DIM*n+1] = atomicExch( &v[DIM*position+1], v[DIM*n+1]);
-    v[DIM*n+2] = atomicExch( &v[DIM*position+2], v[DIM*n+2]);
-    belongsToBox[n] = atomicExch( &belongsToBox[position], belongsToBox[n]);
+    newV[DIM*position]   = v[DIM*n];
+    newV[DIM*position+1] = v[DIM*n+1];
+    newV[DIM*position+2] = v[DIM*n+2];
+    newBelongsToBox[position] = belongsToBox[n];
     }
 }
 
 
-int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStart, int **d_vPartsStart,
+int hashing3D(float *v, float **d_v, size_t vSize, int N, int d, int **vPartsStart, int **d_vPartsStart,
               int **vBelongsToBox, int **d_vBelongsToBox, size_t numberOfBlocks, size_t threadsPerBlock)
 {
 
   int d3 = d*d*d;
-  int *belongsToBox, *d_belongsToBox, *d_positionWithinBox, *boxStart, *d_boxStart;
+  int *belongsToBox, *d_newBelongsToBox, *d_belongsToBox, *d_positionWithinBox, *boxStart, *d_boxStart;
   cudaError_t err;
-  
+  float *d_newV;
+
   size_t belongsToBoxSize = N*sizeof(int);
   size_t boxStartSize     = (d3+1)*sizeof(int);
 
   CUDA_CALL(cudaMalloc(&d_belongsToBox, belongsToBoxSize));
+  CUDA_CALL(cudaMalloc(&d_newBelongsToBox, belongsToBoxSize));
   CUDA_CALL(cudaMalloc(&d_positionWithinBox, belongsToBoxSize));
   CUDA_CALL(cudaMalloc(&d_boxStart, boxStartSize));
+  CUDA_CALL(cudaMalloc(&d_newV, vSize));
 
   belongsToBox = (int *)malloc(belongsToBoxSize);
   if(belongsToBox == NULL) {
@@ -147,9 +162,19 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStar
     exit(1);
   }  
   // printf("tr:%zu, bl:%zu\n",threadsPerBlock, numberOfBlocks);
+  cuInitBoxCount<<<threadsPerBlock, numberOfBlocks>>>(d_boxStart, d3+1);
+
+  err = cudaGetLastError();
+  if (err != cudaSuccess) {
+      printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
+             __FILE__,__LINE__);
+      return EXIT_FAILURE;
+  }
+
+  CUDA_CALL(cudaDeviceSynchronize());
 
   cuFindBelongsToBox<<<threadsPerBlock, numberOfBlocks>>>
-    (d_v, N, d, d_belongsToBox, d_positionWithinBox, d_boxStart);
+    (*d_v, N, d, d_belongsToBox, d_positionWithinBox, d_boxStart+1);
 
   err = cudaGetLastError();
   if (err != cudaSuccess) {
@@ -167,7 +192,7 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStar
   // As is, IT WON'T WORK FOR d > 3
   // We will have to try an implementation with more than 1 blocks, 
   // in order to yeild maximum performonce 
-  cuPrefixSum<<<1, maxNumOfThreads, boxStartSize>>>
+/*  cuPrefixSum<<<1, maxNumOfThreads, boxStartSize>>>
     (d_boxStart, d3);
 
   err = cudaGetLastError();
@@ -178,9 +203,20 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStar
   }
 
   CUDA_CALL(cudaDeviceSynchronize());
+*/
+
+  CUDA_CALL(cudaMemcpy(boxStart, d_boxStart, boxStartSize, cudaMemcpyDeviceToHost));
+
+  cumsum(boxStart,d3);
+  
+/*  for(int i=0;i<d3;i++)
+    printf("%d: %d, ",i, boxStart[i]);
+  printf("\n");
+*/
+  CUDA_CALL(cudaMemcpy(d_boxStart, boxStart, boxStartSize, cudaMemcpyHostToDevice));
 
   cuRearrangeV<<<threadsPerBlock, numberOfBlocks>>>
-    (d_v, N, d, d_belongsToBox, d_positionWithinBox, d_boxStart);
+    (*d_v, d_newV, N, d, d_belongsToBox, d_newBelongsToBox, d_positionWithinBox, d_boxStart);
 
   err = cudaGetLastError();
   if (err != cudaSuccess) {
@@ -190,21 +226,24 @@ int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStar
   }
   CUDA_CALL(cudaDeviceSynchronize());
 
-  CUDA_CALL(cudaMemcpy(v, d_v, vSize, cudaMemcpyDeviceToHost));
+  CUDA_CALL(cudaMemcpy(v, d_newV, vSize, cudaMemcpyDeviceToHost));
+  CUDA_CALL(cudaFree(*d_v));
   CUDA_CALL(cudaMemcpy(boxStart, d_boxStart, boxStartSize, cudaMemcpyDeviceToHost));
-  CUDA_CALL(cudaMemcpy(belongsToBox, d_belongsToBox, belongsToBoxSize, cudaMemcpyDeviceToHost));
+  CUDA_CALL(cudaMemcpy(belongsToBox, d_newBelongsToBox, belongsToBoxSize, cudaMemcpyDeviceToHost));
+  CUDA_CALL(cudaFree(d_belongsToBox));
+  *d_v = d_newV;
 
   *vPartsStart = boxStart;
   *d_vPartsStart = d_boxStart;
   *vBelongsToBox = belongsToBox;
-  *d_vBelongsToBox = d_belongsToBox;
+  *d_vBelongsToBox = d_newBelongsToBox;
 
   CUDA_CALL(cudaFree(d_positionWithinBox));
     
   return 0;
 }
 
-int hashing3D(float *v, float *d_v, size_t vSize, int N, int d, int **vPartsStart, int **d_vPartsStart,
+int hashing3D(float *v, float **d_v, size_t vSize, int N, int d, int **vPartsStart, int **d_vPartsStart,
               size_t numberOfBlocks, size_t threadsPerBlock) {
 
   int *belongsToBox, *d_belongsToBox;

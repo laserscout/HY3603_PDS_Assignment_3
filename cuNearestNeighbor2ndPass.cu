@@ -16,10 +16,6 @@
 #define SOFTENING 1e-9f
 #define DIM 3
 
-// __constant__ int d_tensorVector0[3];
-// __constant__ int d_tensorVector1[3];
-// __constant__ int d_tensorVector2[3];
-
 // S has the points that will look for the nearerst neighbor
 // P is a gridded representation of the Q points vector
 // d3 is the d value cubed. AKA the number of the grids.
@@ -43,17 +39,7 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
   int oneOone[] = {-1, 0, 1};
 
   for(int idx=process; idx<NQ; idx+=stride) {
-    // printf(">Q[%d] code:%d\n", idx, checkOutside[idx]);
     if(checkOutside[idx] == 1) { 
-    // Probably "== 1" is not needed, but since type variable is char, 
-    //it was introduced and may be dumped if it operates without it 
-
-      // // Could have been 0 as well
-      // if(threadIdx.x==13) {
-      //   total_nearestDist = 1.000000;
-      //   total_nearestIdx = -1;
-      // }
-      // __syncthreads();
 
       q = Q+(DIM*idx);
       boxId = checkedQInBox[idx];
@@ -82,10 +68,6 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
           } 
         } // end of for(int S_num=0; S_num<SDim[boxIdToCheck]; S_num++)
 
-        // if(nearestDist<total_nearestDist) {
-        //   atomicExch(&total_nearestDist, nearestDist);
-        //   atomicExch(&total_nearestIdx, nearestIdx);
-        // }
       }
       total_nearestDist[threadIdx.x] = nearestDist;
       total_nearestIdx [threadIdx.x] = nearestIdx;
@@ -99,10 +81,6 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
 	}
       }
       neighbor[idx] = nearestIdx;
-      // printf(">>>Q[%d] > C[%d]\n",idx,nearestIdx);
-
-      // if(threadIdx.x==13)
-      //   neighbor[idx] = total_nearestIdx;  
     }        
   } // end of  for(int P_num=0; P_num<P_size[i]; P_num++)
 

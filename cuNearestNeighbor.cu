@@ -34,7 +34,6 @@ void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int
   float dx, dy, dz, distSqr, dist, nearestDist, gridX, gridY, gridZ;
   int boxId, temp, nearestIdx;
 
-
   for(int idx=proccess; idx<NQ; idx+=stride) {
     q = Q+(DIM*idx);
     boxId = checkQInBox[idx];
