@@ -19,10 +19,6 @@
 
 #define DIM 3
 
-__constant__ int d_tensorVector0[3];
-__constant__ int d_tensorVector1[3];
-__constant__ int d_tensorVector2[3];
-
 int main (int argc, char *argv[]) {
 
   float *Q, *C, *d_Q, *d_C;
@@ -71,14 +67,6 @@ int main (int argc, char *argv[]) {
   threadsPerBlock = 8*warp;
   numberOfBlocks  = 5*multiP;
 
-  int tensorVector0[3] = {(-1)	  , 0, (+1)};
-  int tensorVector1[3] = {(-1)*d  , 0, (+1)*d};
-  int tensorVector2[3] = {(-1)*d*d, 0, (+1)*d*d};
-
-  cudaMemcpyToSymbol(d_tensorVector0, tensorVector0, 3 * sizeof(int));
-  cudaMemcpyToSymbol(d_tensorVector1, tensorVector1, 3 * sizeof(int));
-  cudaMemcpyToSymbol(d_tensorVector2, tensorVector2, 3 * sizeof(int));
-
   randFloat(&Q, &d_Q, NQ);
   QSize = DIM * NQ * sizeof(float);
   randFloat(&C, &d_C, NC);
@@ -110,7 +98,8 @@ int main (int argc, char *argv[]) {
   cudaEventRecord(startOfHashing);
 
   // Hashing C into d*d*d boxes
-  hashing3D(C, d_C, CSize, NC, d, &S, &d_S, numberOfBlocks, threadsPerBlock);
+  hashing3D(C, d_C, CSize, NC, d, &S, &d_S, 
+  		numberOfBlocks, threadsPerBlock);
 
   int *QBoxIdToCheck, *d_QBoxIdToCheck;
   hashing3D(Q, d_Q, QSize, NQ, d, &P, &d_P, &QBoxIdToCheck, &d_QBoxIdToCheck,
@@ -185,14 +174,8 @@ int main (int argc, char *argv[]) {
   
   if(verboseFlag == 1) {
     printf(" ==== Neighbors! ==== \n");
-    for(int i = 0; i < NQ ; i++){
-      for (int d=0; d<DIM; d++)
-	printf("%1.4f ", Q[i*DIM+d]);
-      printf("-> ");
-      for (int d=0; d<DIM; d++)
-	printf("%1.4f ", C[neighbor[i]*DIM+d]);
-      printf("\n");
-    }
+    for(int i = 0; i < NQ ; i++)
+    	printf("> Q[%d] -> C[%d]\n",i,neighbor[i]);
   }
 
   cuNearestNeighbor2ndPass<<<numberOfBlocks*10, 27>>>
@@ -206,17 +189,10 @@ int main (int argc, char *argv[]) {
   }
 
   
-  
   if(verboseFlag == 1) {
     printf(" ==== Neighbors! ==== \n");
-    for(int i = 0; i < NQ ; i++){
-      for (int d=0; d<DIM; d++)
-	printf("%1.4f ", Q[i*DIM+d]);
-      printf("-> ");
-      for (int d=0; d<DIM; d++)
-	printf("%1.4f ", C[neighbor[i]*DIM+d]);
-      printf("\n");
-    }
+    for(int i = 0; i < NQ ; i++)
+    	printf(">> Q[%d] -> C[%d]\n",i,neighbor[i]);
   }
 
   if(noValidationFlag==0) {
