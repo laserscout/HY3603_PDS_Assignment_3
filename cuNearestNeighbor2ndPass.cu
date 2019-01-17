@@ -43,8 +43,8 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
 
       q = Q+(DIM*idx);
       boxId = checkedQInBox[idx];
-      nearestDist = 1;        //This is HUGE!
-
+      nearestDist = 1;        // This is HUGE!
+      nearestIdx = -1;        // Error checking value
       // Calculate the boxIdToCheck of each thread, depending on its Idx
       int div9 = (int)threadIdx.x/9;
       int mod9 = (int)threadIdx.x%9;

@@ -50,18 +50,22 @@ int cpuValidation(float *Q, int NQ, float *C, int NC, int *results, char verbose
     if(results[i] != NNidx) {
       printf("     ! ! ! VALIDATION FAILED ! ! !\n");
       printf("-> On Q[%d]: (%1.4f, %1.4f, %1.4f)\n",i, xQ, yQ, zQ);
-      printf("Algorithm found C[%d] as the NN, while in fact it was C[%d].\n", results[i], NNidx);
-      printf("      (%1.4f, %1.4f, %1.4f)                 (%1.4f, %1.4f, %1.4f)\n\n",
-	     C[results[i]*DIM],C[results[i]*DIM+1],C[results[i]*DIM+2],
-	     C[NNidx*DIM],C[NNidx*DIM+1],C[NNidx*DIM+2]);
+      if(results[i] == -1)
+        printf("\nAlgorithm did not manage to locate a neighbor within the Primary nor the Secondary Candidates\n\n\n");
+      else {
+        printf("Algorithm found C[%d] as the NN, while in fact it was C[%d].\n", results[i], NNidx);
+        printf("      (%1.4f, %1.4f, %1.4f)                 (%1.4f, %1.4f, %1.4f)\n\n",
+  	     C[results[i]*DIM],C[results[i]*DIM+1],C[results[i]*DIM+2],
+  	     C[NNidx*DIM],C[NNidx*DIM+1],C[NNidx*DIM+2]);
+      }
       flag = 1;
-      if(verboseFlag==0)
-	return flag;
+      if(verboseFlag==0) // If verboseFlag is enabled quit as soon as you find the first miscalculated NN
+      	return flag;
     }
 
   } // End of going through all Q;
 
-  if(verboseFlag==0) // If it reached here with the verbose flag then it hasn't retunred 1 (look 3 lines up)
+  if(flag==0) // If it reached here with flag == 0 then it has found no error
     printf("     ! ! ! VALIDATION SUCCEEDED ! ! !\n\n");
       
   return flag;

@@ -14,20 +14,19 @@
 
 #define DIM 3
 
-void cumsum(int *array, int index) {
-    if(index <= 0) return;
-    cumsum(array, index -1);
-    array[index] += array[index - 1];
+void prefixSum(int *array, int size) {
+	for(int i=1; i<size; i++) 
+		array[i] += array[i-1];
 }
 
 __global__
-void cuInitBoxCount(int *d_boxCount, int n) {
+void cuInitZero(int *d_boxSize, int n) {
 
   int process = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
 
   for(int i=process; i<n; i+=stride){
-    d_boxCount[i]=0;
+    d_boxSize[i]=0;
   }
 }
 
@@ -97,7 +96,7 @@ int hashing3D(float *v, float **d_v, size_t vSize, int N, int d, int **vPartsSta
     exit(1);
   }  
   // printf("tr:%zu, bl:%zu\n",threadsPerBlock, numberOfBlocks);
-  cuInitBoxCount<<<threadsPerBlock, numberOfBlocks>>>(d_boxStart, d3+1);
+  cuInitZero<<<threadsPerBlock, numberOfBlocks>>>(d_boxStart, d3+1);
 
   err = cudaGetLastError();
   if (err != cudaSuccess) {
@@ -122,7 +121,7 @@ int hashing3D(float *v, float **d_v, size_t vSize, int N, int d, int **vPartsSta
 
   CUDA_CALL(cudaMemcpy(boxStart, d_boxStart, boxStartSize, cudaMemcpyDeviceToHost));
 
-  cumsum(boxStart,d3);
+  prefixSum(boxStart,d3);
   
 /*  for(int i=0;i<d3;i++)
     printf("%d: %d, ",i, boxStart[i]);
