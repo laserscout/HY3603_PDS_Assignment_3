@@ -121,7 +121,7 @@ int hashing3D(float *v, float **d_v, size_t vSize, int N, int d, int **vPartsSta
 
   CUDA_CALL(cudaMemcpy(boxStart, d_boxStart, boxStartSize, cudaMemcpyDeviceToHost));
 
-  prefixSum(boxStart,d3);
+  prefixSum(boxStart,d3+1);
   
 /*  for(int i=0;i<d3;i++)
     printf("%d: %d, ",i, boxStart[i]);
