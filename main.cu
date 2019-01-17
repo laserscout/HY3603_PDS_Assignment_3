@@ -189,7 +189,7 @@ int main (int argc, char *argv[]) {
   }
     
   // THE END
-    
+  cudaEventRecord(stop);
   cudaEventSynchronize(stop);
   float milliseconds = 0;
   cudaEventElapsedTime(&milliseconds, startOfHashing, startOfFirstRun);
