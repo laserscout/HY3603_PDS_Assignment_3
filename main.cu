@@ -171,7 +171,7 @@ int main (int argc, char *argv[]) {
   // Second Run of Nearest neighbor function
   cudaEventRecord(startOfSecondRun);
 
-  cuNearestNeighbor2ndPass<<<numberOfBlocks, threadsPerBlock>>>
+  cuNearestNeighbor2ndPass<<<numberOfBlocks, threadsPerBlock/8>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
     
   err = cudaGetLastError();
