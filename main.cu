@@ -14,6 +14,7 @@
 #include "cuRandFloat.h"
 #include "hashing3D.h"
 #include "cpuValidation.h"
+#include "gpuValidation.h"
 #include "cuNearestNeighbor.h"
 #include "cuNearestNeighbor2ndPass.h"
 
@@ -202,11 +203,12 @@ int main (int argc, char *argv[]) {
   printf("Duration of the second run of the kernel: %1.6fms\n",milliseconds);
 
   if(noValidationFlag==0) {
-    CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
-    CUDA_CALL(cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost));
-    CUDA_CALL(cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost));
+    // CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
+    // CUDA_CALL(cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost));
+    // CUDA_CALL(cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost));
     /* Validating the NN results */
-    cpuValidation(Q, NQ, C, NC, neighbor, verboseFlag);
+    // cpuValidation(Q, NQ, C, NC, neighbor, verboseFlag);
+    gpuValidation(d_Q, NQ, d_C, NC, d_neighbor, verboseFlag, numberOfBlocks, threadsPerBlock);
   }
   
   /* Cleanup */
