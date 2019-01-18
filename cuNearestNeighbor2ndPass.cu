@@ -44,6 +44,7 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
     q_y = q[1];
     q_z = q[2];
 
+    // printf("%d: %d",idx, checkOutside[idx]);
     boxId = checkedQInBox[checkOutside[idx]];
     countBoxesToCheck = 0;
     nearestDist = 1;        // This is HUGE!
@@ -55,30 +56,24 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
           boxIdToCheck = boxId + oneOone[i] + d*oneOone[i_d] + d2*oneOone[i_d2]; 
 
           if(boxIdToCheck < d3 && boxIdToCheck >=0) {
-            
-            boxesToCheck[countBoxesToCheck]=boxIdToCheck;
-            countBoxesToCheck++;
-          }
+	    for(int S_num=S[boxIdToCheck]; S_num<S[boxIdToCheck+1]; S_num++){
+	      c = C+(S_num*DIM);
+	      dx = q_x - c[0];
+	      dy = q_y - c[1];
+	      dz = q_z - c[2];
+	      distSqr = dx*dx + dy*dy + dz*dz;
+	      dist = sqrtf(distSqr);
+	      if(dist<nearestDist){
+        	nearestDist = dist;
+        	nearestIdx = S_num;
+	      } 
+	    } 
+	  }
           // printf(">Q[%d] checking in box %d\n",idx,boxIdToCheck);
 
         }
       }
     }
-
-    for(int i=0; i<countBoxesToCheck; i++) {
-      for(int S_num=S[boxesToCheck[i]]; S_num<S[boxesToCheck[i]+1]; S_num++){
-        c = C+(S_num*DIM);
-        dx = q_x - c[0];
-        dy = q_y - c[1];
-        dz = q_z - c[2];
-        distSqr = dx*dx + dy*dy + dz*dz;
-        dist = sqrtf(distSqr);
-        if(dist<nearestDist){
-        	nearestDist = dist;
-        	nearestIdx = S_num;
-        } 
-      } 
-    }
-    neighbor[checkOutside[idx]] = nearestIdx;    
+    neighbor[checkOutside[idx]] = nearestIdx; 
   }// end of for(int S_num=0; S_num<SDim[boxIdToCheck]; S_num++)
 }
