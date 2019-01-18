@@ -138,9 +138,9 @@ int main (int argc, char *argv[]) {
   cudaEventRecord(startOfFirstRun);
 
   int *neighbor, *d_neighbor;
-  char *d_checkOutside;
+  int *d_checkOutside;
   size_t neighborSize = NQ * sizeof(int);
-  size_t checkOutsideSize = NQ * sizeof(char);
+  size_t checkOutsideSize = (NQ+1) * sizeof(int);
   
   CUDA_CALL(cudaMalloc(&d_neighbor,neighborSize));
   neighbor = (int *)malloc(neighborSize);
@@ -152,6 +152,7 @@ int main (int argc, char *argv[]) {
   
   cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
+  
   err = cudaGetLastError();
   if (err != cudaSuccess) {
       printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
@@ -159,8 +160,24 @@ int main (int argc, char *argv[]) {
       return EXIT_FAILURE;
   }
   
+
   CUDA_CALL(cudaDeviceSynchronize());
+/*
+  CUDA_CALL(cudaMalloc(&d_checkOutside,checkOutsideSize));
   
+  cuWhichCheckOutside<<<numberOfBlocks, threadsPerBlock>>>
+    (d_Q, NQ, d_checkOutside, d_QtoCheckOutside);
+
+  err = cudaGetLastError();
+  if (err != cudaSuccess) {
+      printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
+             __FILE__,__LINE__);
+      return EXIT_FAILURE;
+  }
+  
+
+  CUDA_CALL(cudaDeviceSynchronize());
+*/
   if(verboseFlag == 1) {
     CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
     printf(" ==== Neighbors! ==== \n");

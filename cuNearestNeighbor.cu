@@ -22,7 +22,13 @@
 // d3 is the d value cubed. AKA the number of the grid boxes.
 
 __global__
-void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int d, int *neighbor, char *checkOutside) {
+void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int d, int *neighbor, int *checkOutside) {
+
+
+  // Or anyway you find better for the counter to initialize
+  checkOutside[NQ] = 0;
+  // I'm gonna keep the counter of how many q's will checkOutside in the NQ position of array checkOutside
+  __syncthreads();
 
   int process = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
@@ -70,18 +76,12 @@ void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int
     dy = q[1] - gridY;
     dz = q[2] - gridZ;
     
-    /*
-    Here remove checkOutside and perform the 26 checks as in older version 
-    (nearestKernel it was I think) then hold the 26 results in a local array 
-    and merge this function with 2nd Pass and this way we are good to go 
-    with a single pass ! ! ! And reduced checks ! ! !
-    */
     if( (dx)<nearestDist || (invd-dx)<nearestDist ||
       	(dy)<nearestDist || (invd-dy)<nearestDist ||
-      	(dz)<nearestDist || (invd-dz)<nearestDist  )
-      checkOutside[idx]=1;
-    else
-      checkOutside[idx]=0;      
+      	(dz)<nearestDist || (invd-dz)<nearestDist  ) {
+
+      checkOutside[atomicAdd(&checkOutside[NQ], 1)]=idx;
+    }      
       
   } // end of  for(int P_num=0; P_num<P_size[i]; P_num++)
 }
