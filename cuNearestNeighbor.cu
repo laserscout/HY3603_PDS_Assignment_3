@@ -70,6 +70,12 @@ void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int
     dy = q[1] - gridY;
     dz = q[2] - gridZ;
     
+    /*
+    Here remove checkOutside and perform the 26 checks as in older version 
+    (nearestKernel it was I think) then hold the 26 results in a local array 
+    and merge this function with 2nd Pass and this way we are good to go 
+    with a single pass ! ! ! And reduced checks ! ! !
+    */
     if( (dx)<nearestDist || (invd-dx)<nearestDist ||
       	(dy)<nearestDist || (invd-dy)<nearestDist ||
       	(dz)<nearestDist || (invd-dz)<nearestDist  )
