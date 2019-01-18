@@ -150,6 +150,10 @@ int main (int argc, char *argv[]) {
   }
   CUDA_CALL(cudaMalloc(&d_checkOutside,checkOutsideSize));
   
+  // We will create 1 thread for each query point
+  threadsPerBlock = 1024; // = maxThreadsPerBlock;
+  numberOfBlocks = (int)(NQ/threadsPerBlock);
+  
   cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
   err = cudaGetLastError();
@@ -171,8 +175,9 @@ int main (int argc, char *argv[]) {
   // Second Run of Nearest neighbor function
   cudaEventRecord(startOfSecondRun);
 
-  cuNearestNeighbor2ndPass<<<numberOfBlocks*10, 27>>>
+  cuNearestNeighbor2ndPass<<<numberOfBlocks, threadsPerBlock>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
+    
   err = cudaGetLastError();
   if (err != cudaSuccess) {
       printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
