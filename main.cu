@@ -150,10 +150,6 @@ int main (int argc, char *argv[]) {
   }
   CUDA_CALL(cudaMalloc(&d_checkOutside,checkOutsideSize));
   
-  // We will create 1 thread for each query point
-  threadsPerBlock = 1024; // = maxThreadsPerBlock;
-  numberOfBlocks = (int)(NQ/threadsPerBlock);
-  
   cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
   err = cudaGetLastError();
@@ -208,10 +204,10 @@ int main (int argc, char *argv[]) {
   printf("Duration of the second run of the kernel: %1.6fms\n",milliseconds);
 
   if(noValidationFlag==0) {
+    /* Validating the NN results */
     // CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
     // CUDA_CALL(cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost));
     // CUDA_CALL(cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost));
-    /* Validating the NN results */
     // cpuValidation(Q, NQ, C, NC, neighbor, verboseFlag);
     gpuValidation(d_Q, NQ, d_C, NC, d_neighbor, verboseFlag, numberOfBlocks, threadsPerBlock);
   }

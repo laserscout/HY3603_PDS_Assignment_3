@@ -25,7 +25,7 @@ __global__
 void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int d, int *neighbor, char *checkOutside) {
 
   int process = threadIdx.x + blockIdx.x * blockDim.x;
-  // int stride = blockDim.x * gridDim.x;
+  int stride = blockDim.x * gridDim.x;
 
   // int d3 = d*d*d;
   int d2 = d*d;
@@ -35,16 +35,16 @@ void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int
   float dx, dy, dz, distSqr, dist, nearestDist, gridX, gridY, gridZ;
   int boxId, temp, nearestIdx;
 
-  // for(int idx=process; idx<NQ; idx+=stride) {
-    q = Q+(DIM*process);
+   for(int idx=process; idx<NQ; idx+=stride) {
+    q = Q+(DIM*idx);
     q_x = q[0];
     q_y = q[1];
     q_z = q[2];
 
-    boxId = checkQInBox[process];
+    boxId = checkQInBox[idx];
     nearestDist = 1;        // This is HUGE!
     nearestIdx = -1;        // Error checking value
-    // printf("q[%d]:%1.4f, %1.4f, %1.4f | Belongs to %d\n",process,q[0],q[1],q[2],boxId);
+    // printf("q[%d]:%1.4f, %1.4f, %1.4f | Belongs to %d\n",idx,q[0],q[1],q[2],boxId);
     for(int S_num=S[boxId]; S_num<S[boxId+1]; S_num++){
       c = C+(S_num*DIM);
       dx = q_x - c[0];
@@ -57,7 +57,7 @@ void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int
       	nearestIdx = S_num;
       }
     } // end of for(int S_num=0; S_num<SDim[boxId]; S_num++)
-    neighbor[process]=nearestIdx;
+    neighbor[idx]=nearestIdx;
    
     // These are the XYZ coordinates of the grid box
     gridZ = (boxId / d2) * invd;
@@ -79,9 +79,9 @@ void cuNearestNeighbor(float *C, int *S, float *Q, int NQ, int *checkQInBox, int
     if( (dx)<nearestDist || (invd-dx)<nearestDist ||
       	(dy)<nearestDist || (invd-dy)<nearestDist ||
       	(dz)<nearestDist || (invd-dz)<nearestDist  )
-      checkOutside[process]=1;
+      checkOutside[idx]=1;
     else
-      checkOutside[process]=0;      
+      checkOutside[idx]=0;      
       
-  // } // end of  for(int P_num=0; P_num<P_size[i]; P_num++)
+  } // end of  for(int P_num=0; P_num<P_size[i]; P_num++)
 }
