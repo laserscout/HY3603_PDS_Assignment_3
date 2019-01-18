@@ -26,7 +26,7 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
   int process = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
 
-  int boxIdToCheck, countBoxesToCheck = 0;
+  int boxIdToCheck, countBoxesToCheck;
   int boxesToCheck[27];
 
   int d3 = d*d*d;
@@ -45,6 +45,7 @@ void cuNearestNeighbor2ndPass(float *C, int *S, float *Q, int NQ, int *checkedQI
     q_z = q[2];
 
     boxId = checkedQInBox[checkOutside[idx]];
+    countBoxesToCheck = 0;
     nearestDist = 1;        // This is HUGE!
     nearestIdx = -1;        // Error checking value
     for(int i=0; i<3; i++) {
