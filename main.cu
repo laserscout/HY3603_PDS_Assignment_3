@@ -14,32 +14,27 @@
 #include "cuRandFloat.h"
 #include "hashing3D.h"
 #include "cpuValidation.h"
+#include "gpuValidation.h"
 #include "cuNearestNeighbor.h"
 #include "cuNearestNeighbor2ndPass.h"
 
 #define DIM 3
 
-__constant__ int d_tensorVector0[3];
-__constant__ int d_tensorVector1[3];
-__constant__ int d_tensorVector2[3];
-
 int main (int argc, char *argv[]) {
 
   float *Q, *C, *d_Q, *d_C;
-  size_t QSize, CSize;
-  int *S, *d_S, *P, *d_P;
-  int NC, NQ, d;
-  int SDim;
+  int *S, *d_S, *P, *d_P, *QBoxIdToCheck, *d_QBoxIdToCheck;
+  int NC, NQ, d, SDim;
   cudaError_t err;
   char verboseFlag = 0;
   char noValidationFlag = 0;
 
+  // Parsing input arguments
   if (argc < 4) {
     printf("Usage: %s [flags] arg1 arg2 arg3\n  where NC=2^arg1, NQ=2^arg2 and d=2^arg3\n",
 	   argv[0]);
     exit(1);
   }
-
   for(int i=1; i<argc; i++) {
     if (strcmp(argv[i], "-v") == 0)
       {                 
@@ -57,32 +52,37 @@ int main (int argc, char *argv[]) {
     }
       
   }
+    
+  // Initializing
+    
+  int d3 = d*d*d;
+  size_t QSize = DIM * NQ * sizeof(float);
+  size_t CSize = DIM * NC * sizeof(float);
+  size_t QBoxIdToCheckSize = NQ * sizeof(int);
+  size_t SSize = (d3+1) * sizeof(int); 
   
+  // CUDA Device setup
   size_t threadsPerBlock, warp;
   size_t numberOfBlocks, multiP;
-
   int deviceId;
   cudaDeviceProp props;
   cudaGetDevice(&deviceId);
   cudaGetDeviceProperties(&props, deviceId);
-
   warp = props.warpSize;
   multiP = props.multiProcessorCount;
   threadsPerBlock = 8*warp;
   numberOfBlocks  = 5*multiP;
+    
+  // Timers setup
+  cudaEvent_t startOfHashing, startOfFirstRun, startOfSecondRun, stop;
+  cudaEventCreate(&startOfHashing);
+  cudaEventCreate(&startOfFirstRun);
+  cudaEventCreate(&startOfSecondRun);
+  cudaEventCreate(&stop);
 
-  int tensorVector0[3] = {(-1)	  , 0, (+1)};
-  int tensorVector1[3] = {(-1)*d  , 0, (+1)*d};
-  int tensorVector2[3] = {(-1)*d*d, 0, (+1)*d*d};
-
-  cudaMemcpyToSymbol(d_tensorVector0, tensorVector0, 3 * sizeof(int));
-  cudaMemcpyToSymbol(d_tensorVector1, tensorVector1, 3 * sizeof(int));
-  cudaMemcpyToSymbol(d_tensorVector2, tensorVector2, 3 * sizeof(int));
-
+  // Create input Data
   randFloat(&Q, &d_Q, NQ);
-  QSize = DIM * NQ * sizeof(float);
   randFloat(&C, &d_C, NC);
-  CSize = DIM * NC * sizeof(float);
   CUDA_CALL(cudaDeviceSynchronize());
 
   if(verboseFlag == 1) {
@@ -101,23 +101,18 @@ int main (int argc, char *argv[]) {
     }
   }
 
-  cudaEvent_t startOfHashing, startOfFirstRun, startOfSecondRun, stop;
-  cudaEventCreate(&startOfHashing);
-  cudaEventCreate(&startOfFirstRun);
-  cudaEventCreate(&startOfSecondRun);
-  cudaEventCreate(&stop);
-
+  // Aranging C and Q into d*d*d boxes
   cudaEventRecord(startOfHashing);
+  hashing3D(C, &d_C, CSize, NC, d, &S, &d_S, 
+  		numberOfBlocks, threadsPerBlock);
 
-  // Hashing C into d*d*d boxes
-  hashing3D(C, d_C, CSize, NC, d, &S, &d_S, numberOfBlocks, threadsPerBlock);
-
-  int *QBoxIdToCheck, *d_QBoxIdToCheck;
-  hashing3D(Q, d_Q, QSize, NQ, d, &P, &d_P, &QBoxIdToCheck, &d_QBoxIdToCheck,
+  hashing3D(Q, &d_Q, QSize, NQ, d, &P, &d_P, &QBoxIdToCheck, &d_QBoxIdToCheck,
 	    numberOfBlocks, threadsPerBlock);
 
   if(verboseFlag == 1){
     /* Show result */
+    CUDA_CALL(cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost));
+    CUDA_CALL(cudaMemcpy(QBoxIdToCheck, d_QBoxIdToCheck, QBoxIdToCheckSize, cudaMemcpyDeviceToHost));
     printf("\nd=%d\n\n",d);
     printf(" ====new Q vector==== \n");
     for(int i = 0; i < NQ ; i++){
@@ -125,6 +120,8 @@ int main (int argc, char *argv[]) {
 	printf("%1.4f ", Q[i*DIM+d]);
       printf("| Belongs to box:%d\n",QBoxIdToCheck[i]);
     }
+    CUDA_CALL(cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost));
+    CUDA_CALL(cudaMemcpy(S, d_S, SSize, cudaMemcpyDeviceToHost));
     printf(" ======S vector====== \n");
     for(int boxid=0;boxid<d*d*d;boxid++){
       SDim = S[boxid+1]-S[boxid];
@@ -137,12 +134,13 @@ int main (int argc, char *argv[]) {
     }
   }
 
+  // First Run of Nearest neighbor function
   cudaEventRecord(startOfFirstRun);
 
   int *neighbor, *d_neighbor;
-  char *d_checkOutside;
+  int *d_checkOutside;
   size_t neighborSize = NQ * sizeof(int);
-  size_t checkOutsideSize = NQ * sizeof(char);
+  size_t checkOutsideSize = (NQ+1) * sizeof(int);
   
   CUDA_CALL(cudaMalloc(&d_neighbor,neighborSize));
   neighbor = (int *)malloc(neighborSize);
@@ -150,15 +148,25 @@ int main (int argc, char *argv[]) {
     printf("Error allocating neighbor");
     exit(1);
   }
-
   CUDA_CALL(cudaMalloc(&d_checkOutside,checkOutsideSize));
   
-  cudaEventRecord(startOfSecondRun);
-
   cuNearestNeighbor<<<numberOfBlocks, threadsPerBlock>>>
     (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
+  
+  err = cudaGetLastError();
+  if (err != cudaSuccess) {
+      printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
+             __FILE__,__LINE__);
+      return EXIT_FAILURE;
+  }
+  
 
-  cudaEventRecord(stop);
+  CUDA_CALL(cudaDeviceSynchronize());
+/*
+  CUDA_CALL(cudaMalloc(&d_checkOutside,checkOutsideSize));
+  
+  cuWhichCheckOutside<<<numberOfBlocks, threadsPerBlock>>>
+    (d_Q, NQ, d_checkOutside, d_QtoCheckOutside);
 
   err = cudaGetLastError();
   if (err != cudaSuccess) {
@@ -167,8 +175,40 @@ int main (int argc, char *argv[]) {
       return EXIT_FAILURE;
   }
   
+
   CUDA_CALL(cudaDeviceSynchronize());
+*/
+  if(verboseFlag == 1) {
+    CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
+    printf(" ==== Neighbors! ==== \n");
+    for(int i = 0; i < NQ ; i++)
+    	printf("> Q[%d] -> C[%d]\n",i,neighbor[i]);
+  }
+
+  // Second Run of Nearest neighbor function
+  cudaEventRecord(startOfSecondRun);
+
+  cuNearestNeighbor2ndPass<<<numberOfBlocks, threadsPerBlock/8>>>
+    (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
     
+  err = cudaGetLastError();
+  if (err != cudaSuccess) {
+      printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
+             __FILE__,__LINE__);
+      return EXIT_FAILURE;
+  }
+  
+  CUDA_CALL(cudaDeviceSynchronize());
+
+  if(verboseFlag == 1) {
+    CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
+    printf(" ==== Neighbors! ==== \n");
+    for(int i = 0; i < NQ ; i++)
+    	printf(">> Q[%d] -> C[%d]\n",i,neighbor[i]);
+  }
+    
+  // THE END
+  cudaEventRecord(stop);
   cudaEventSynchronize(stop);
   float milliseconds = 0;
   cudaEventElapsedTime(&milliseconds, startOfHashing, startOfFirstRun);
@@ -180,49 +220,13 @@ int main (int argc, char *argv[]) {
   cudaEventElapsedTime(&milliseconds, startOfSecondRun, stop);
   printf("Duration of the second run of the kernel: %1.6fms\n",milliseconds);
 
-
-  CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
-  
-  if(verboseFlag == 1) {
-    printf(" ==== Neighbors! ==== \n");
-    for(int i = 0; i < NQ ; i++){
-      for (int d=0; d<DIM; d++)
-	printf("%1.4f ", Q[i*DIM+d]);
-      printf("-> ");
-      for (int d=0; d<DIM; d++)
-	printf("%1.4f ", C[neighbor[i]*DIM+d]);
-      printf("\n");
-    }
-  }
-
-  cuNearestNeighbor2ndPass<<<numberOfBlocks*10, 27>>>
-    (d_C,d_S,d_Q,NQ,d_QBoxIdToCheck,d,d_neighbor,d_checkOutside);
-
-  err = cudaGetLastError();
-  if (err != cudaSuccess) {
-      printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
-             __FILE__,__LINE__);
-      return EXIT_FAILURE;
-  }
-
-  
-  
-  if(verboseFlag == 1) {
-    printf(" ==== Neighbors! ==== \n");
-    for(int i = 0; i < NQ ; i++){
-      for (int d=0; d<DIM; d++)
-	printf("%1.4f ", Q[i*DIM+d]);
-      printf("-> ");
-      for (int d=0; d<DIM; d++)
-	printf("%1.4f ", C[neighbor[i]*DIM+d]);
-      printf("\n");
-    }
-  }
-
   if(noValidationFlag==0) {
-    CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
     /* Validating the NN results */
-    cpuValidation(Q, NQ, C, NC, neighbor, verboseFlag);
+    // CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
+    // CUDA_CALL(cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost));
+    // CUDA_CALL(cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost));
+    // cpuValidation(Q, NQ, C, NC, neighbor, verboseFlag);
+    gpuValidation(d_Q, NQ, d_C, NC, d_neighbor, verboseFlag, numberOfBlocks, threadsPerBlock);
   }
   
   /* Cleanup */

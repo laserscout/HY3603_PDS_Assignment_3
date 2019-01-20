@@ -43,5 +43,5 @@ clean:
 	rm *.o
 
 run:
-	./$(PROJECT_NAME) 5 2 1
+	./$(PROJECT_NAME) -v 5 5 2
 
