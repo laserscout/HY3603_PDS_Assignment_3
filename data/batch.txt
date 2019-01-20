@@ -1,0 +1,500 @@
+NQ:21 NC:21 d:2
+Duration of Q and C hashing: 7.974080ms
+Duration of the first run of the kernel: 161.942535ms
+Duration of the second run of the kernel: 413.559814ms
+NQ:21 NC:21 d:3
+Duration of Q and C hashing: 8.203616ms
+Duration of the first run of the kernel: 21.293056ms
+Duration of the second run of the kernel: 121.611267ms
+NQ:21 NC:21 d:4
+Duration of Q and C hashing: 9.340416ms
+Duration of the first run of the kernel: 3.165184ms
+Duration of the second run of the kernel: 37.519360ms
+NQ:21 NC:21 d:5
+Duration of Q and C hashing: 10.579456ms
+Duration of the first run of the kernel: 0.896000ms
+Duration of the second run of the kernel: 11.274240ms
+NQ:21 NC:21 d:6
+Duration of Q and C hashing: 14.805760ms
+Duration of the first run of the kernel: 0.644096ms
+Duration of the second run of the kernel: 4.675584ms
+NQ:21 NC:22 d:2
+Duration of Q and C hashing: 12.043872ms
+Duration of the first run of the kernel: 304.293884ms
+Duration of the second run of the kernel: 771.803162ms
+NQ:21 NC:22 d:3
+Duration of Q and C hashing: 12.191712ms
+Duration of the first run of the kernel: 41.675777ms
+Duration of the second run of the kernel: 232.087555ms
+NQ:21 NC:22 d:4
+Duration of Q and C hashing: 13.732096ms
+Duration of the first run of the kernel: 5.997568ms
+Duration of the second run of the kernel: 65.622017ms
+NQ:21 NC:22 d:5
+Duration of Q and C hashing: 15.808576ms
+Duration of the first run of the kernel: 1.940480ms
+Duration of the second run of the kernel: 20.709375ms
+NQ:21 NC:22 d:6
+Duration of Q and C hashing: 20.112448ms
+Duration of the first run of the kernel: 1.011712ms
+Duration of the second run of the kernel: 8.821760ms
+NQ:21 NC:23 d:2
+Duration of Q and C hashing: 18.727552ms
+Duration of the first run of the kernel: 595.806213ms
+Duration of the second run of the kernel: 1577.565186ms
+NQ:21 NC:23 d:3
+Duration of Q and C hashing: 19.517344ms
+Duration of the first run of the kernel: 81.901566ms
+Duration of the second run of the kernel: 413.102081ms
+NQ:21 NC:23 d:4
+Duration of Q and C hashing: 21.176607ms
+Duration of the first run of the kernel: 12.577792ms
+Duration of the second run of the kernel: 129.410049ms
+NQ:21 NC:23 d:5
+Duration of Q and C hashing: 23.548897ms
+Duration of the first run of the kernel: 3.621888ms
+Duration of the second run of the kernel: 42.634239ms
+NQ:21 NC:23 d:6
+Duration of Q and C hashing: 29.320127ms
+Duration of the first run of the kernel: 2.615296ms
+Duration of the second run of the kernel: 17.110016ms
+NQ:21 NC:24 d:2
+Duration of Q and C hashing: 33.000961ms
+Duration of the first run of the kernel: 1166.247925ms
+Duration of the second run of the kernel: 3056.511963ms
+NQ:21 NC:24 d:3
+Duration of Q and C hashing: 35.142624ms
+Duration of the first run of the kernel: 147.553284ms
+Duration of the second run of the kernel: 828.128235ms
+NQ:21 NC:24 d:4
+Duration of Q and C hashing: 36.788544ms
+Duration of the first run of the kernel: 21.681152ms
+Duration of the second run of the kernel: 244.645889ms
+NQ:21 NC:24 d:5
+Duration of Q and C hashing: 47.482624ms
+Duration of the first run of the kernel: 4.711424ms
+Duration of the second run of the kernel: 75.012093ms
+NQ:21 NC:24 d:6
+Duration of Q and C hashing: 47.504864ms
+Duration of the first run of the kernel: 4.055040ms
+Duration of the second run of the kernel: 32.539646ms
+NQ:21 NC:25 d:2
+Duration of Q and C hashing: 65.838081ms
+Duration of the first run of the kernel: 2411.357178ms
+Duration of the second run of the kernel: 6138.400879ms
+NQ:21 NC:25 d:3
+Duration of Q and C hashing: 74.092094ms
+Duration of the first run of the kernel: 296.370178ms
+Duration of the second run of the kernel: 1678.520264ms
+NQ:21 NC:25 d:4
+Duration of Q and C hashing: 70.389763ms
+Duration of the first run of the kernel: 44.580864ms
+Duration of the second run of the kernel: 507.231232ms
+NQ:21 NC:25 d:5
+Duration of Q and C hashing: 75.017059ms
+Duration of the first run of the kernel: 9.053184ms
+Duration of the second run of the kernel: 186.240005ms
+NQ:21 NC:25 d:6
+Duration of Q and C hashing: 84.437149ms
+Duration of the first run of the kernel: 4.927488ms
+Duration of the second run of the kernel: 78.568451ms
+NQ:22 NC:21 d:2
+Duration of Q and C hashing: 13.168128ms
+Duration of the first run of the kernel: 309.383179ms
+Duration of the second run of the kernel: 730.937317ms
+NQ:22 NC:21 d:3
+Duration of Q and C hashing: 13.032000ms
+Duration of the first run of the kernel: 42.095615ms
+Duration of the second run of the kernel: 211.964935ms
+NQ:22 NC:21 d:4
+Duration of Q and C hashing: 14.954976ms
+Duration of the first run of the kernel: 5.830656ms
+Duration of the second run of the kernel: 63.510529ms
+NQ:22 NC:21 d:5
+Duration of Q and C hashing: 16.179199ms
+Duration of the first run of the kernel: 1.252352ms
+Duration of the second run of the kernel: 20.516865ms
+NQ:22 NC:21 d:6
+Duration of Q and C hashing: 20.835648ms
+Duration of the first run of the kernel: 0.739328ms
+Duration of the second run of the kernel: 6.406144ms
+NQ:22 NC:22 d:2
+Duration of Q and C hashing: 17.122496ms
+Duration of the first run of the kernel: 593.910767ms
+Duration of the second run of the kernel: 1370.609619ms
+NQ:22 NC:22 d:3
+Duration of Q and C hashing: 16.222015ms
+Duration of the first run of the kernel: 81.569794ms
+Duration of the second run of the kernel: 372.590607ms
+NQ:22 NC:22 d:4
+Duration of Q and C hashing: 19.014944ms
+Duration of the first run of the kernel: 11.149312ms
+Duration of the second run of the kernel: 115.077118ms
+NQ:22 NC:22 d:5
+Duration of Q and C hashing: 20.777281ms
+Duration of the first run of the kernel: 2.167808ms
+Duration of the second run of the kernel: 39.173119ms
+NQ:22 NC:22 d:6
+Duration of Q and C hashing: 26.074944ms
+Duration of the first run of the kernel: 1.150976ms
+Duration of the second run of the kernel: 12.127232ms
+NQ:22 NC:23 d:2
+Duration of Q and C hashing: 23.192513ms
+Duration of the first run of the kernel: 1176.323120ms
+Duration of the second run of the kernel: 2800.680908ms
+NQ:22 NC:23 d:3
+Duration of Q and C hashing: 23.952929ms
+Duration of the first run of the kernel: 153.951233ms
+Duration of the second run of the kernel: 717.450256ms
+NQ:22 NC:23 d:4
+Duration of Q and C hashing: 26.336897ms
+Duration of the first run of the kernel: 22.807552ms
+Duration of the second run of the kernel: 225.589249ms
+NQ:22 NC:23 d:5
+Duration of Q and C hashing: 29.095360ms
+Duration of the first run of the kernel: 4.927488ms
+Duration of the second run of the kernel: 71.441406ms
+NQ:22 NC:23 d:6
+Duration of Q and C hashing: 35.572895ms
+Duration of the first run of the kernel: 2.844672ms
+Duration of the second run of the kernel: 24.545280ms
+NQ:22 NC:24 d:2
+Duration of Q and C hashing: 37.969696ms
+Duration of the first run of the kernel: 2428.912598ms
+Duration of the second run of the kernel: 5514.262695ms
+NQ:22 NC:24 d:3
+Duration of Q and C hashing: 40.726753ms
+Duration of the first run of the kernel: 293.189636ms
+Duration of the second run of the kernel: 1479.041992ms
+NQ:22 NC:24 d:4
+Duration of Q and C hashing: 42.073185ms
+Duration of the first run of the kernel: 38.670338ms
+Duration of the second run of the kernel: 407.876617ms
+NQ:22 NC:24 d:5
+Duration of Q and C hashing: 45.883743ms
+Duration of the first run of the kernel: 7.014400ms
+Duration of the second run of the kernel: 129.474564ms
+NQ:22 NC:24 d:6
+Duration of Q and C hashing: 53.652000ms
+Duration of the first run of the kernel: 4.390912ms
+Duration of the second run of the kernel: 45.134850ms
+NQ:22 NC:25 d:2
+Duration of Q and C hashing: 70.344734ms
+Duration of the first run of the kernel: 4940.745605ms
+Duration of the second run of the kernel: 10868.126953ms
+NQ:22 NC:25 d:3
+Duration of Q and C hashing: 78.142273ms
+Duration of the first run of the kernel: 577.860596ms
+Duration of the second run of the kernel: 2876.400635ms
+NQ:22 NC:25 d:4
+Duration of Q and C hashing: 76.381378ms
+Duration of the first run of the kernel: 80.483330ms
+Duration of the second run of the kernel: 849.467407ms
+NQ:22 NC:25 d:5
+Duration of Q and C hashing: 80.716797ms
+Duration of the first run of the kernel: 14.213120ms
+Duration of the second run of the kernel: 273.239044ms
+NQ:22 NC:25 d:6
+Duration of Q and C hashing: 90.859138ms
+Duration of the first run of the kernel: 4.307968ms
+Duration of the second run of the kernel: 106.502144ms
+NQ:23 NC:21 d:2
+Duration of Q and C hashing: 21.141312ms
+Duration of the first run of the kernel: 612.612122ms
+Duration of the second run of the kernel: 1252.892700ms
+NQ:23 NC:21 d:3
+Duration of Q and C hashing: 21.970753ms
+Duration of the first run of the kernel: 81.648643ms
+Duration of the second run of the kernel: 327.201782ms
+NQ:23 NC:21 d:4
+Duration of Q and C hashing: 23.942688ms
+Duration of the first run of the kernel: 11.076608ms
+Duration of the second run of the kernel: 106.286079ms
+NQ:23 NC:21 d:5
+Duration of Q and C hashing: 26.395136ms
+Duration of the first run of the kernel: 2.000896ms
+Duration of the second run of the kernel: 33.362946ms
+NQ:23 NC:21 d:6
+Duration of Q and C hashing: 32.078304ms
+Duration of the first run of the kernel: 0.958464ms
+Duration of the second run of the kernel: 10.343424ms
+NQ:23 NC:22 d:2
+Duration of Q and C hashing: 25.643744ms
+Duration of the first run of the kernel: 1227.617310ms
+Duration of the second run of the kernel: 2262.664307ms
+NQ:23 NC:22 d:3
+Duration of Q and C hashing: 26.095743ms
+Duration of the first run of the kernel: 152.338425ms
+Duration of the second run of the kernel: 607.451111ms
+NQ:23 NC:22 d:4
+Duration of Q and C hashing: 28.733664ms
+Duration of the first run of the kernel: 21.471231ms
+Duration of the second run of the kernel: 193.372162ms
+NQ:23 NC:22 d:5
+Duration of Q and C hashing: 31.567455ms
+Duration of the first run of the kernel: 3.969024ms
+Duration of the second run of the kernel: 60.996609ms
+NQ:23 NC:22 d:6
+Duration of Q and C hashing: 37.510719ms
+Duration of the first run of the kernel: 1.449984ms
+Duration of the second run of the kernel: 19.484673ms
+NQ:23 NC:23 d:2
+Duration of Q and C hashing: 32.146626ms
+Duration of the first run of the kernel: 2400.774170ms
+Duration of the second run of the kernel: 4660.050781ms
+NQ:23 NC:23 d:3
+Duration of Q and C hashing: 33.343842ms
+Duration of the first run of the kernel: 294.773773ms
+Duration of the second run of the kernel: 1164.340210ms
+NQ:23 NC:23 d:4
+Duration of Q and C hashing: 35.769951ms
+Duration of the first run of the kernel: 40.632320ms
+Duration of the second run of the kernel: 359.291901ms
+NQ:23 NC:23 d:5
+Duration of Q and C hashing: 39.373825ms
+Duration of the first run of the kernel: 7.546880ms
+Duration of the second run of the kernel: 117.003265ms
+NQ:23 NC:23 d:6
+Duration of Q and C hashing: 51.692738ms
+Duration of the first run of the kernel: 3.132416ms
+Duration of the second run of the kernel: 34.710529ms
+NQ:23 NC:24 d:2
+Duration of Q and C hashing: 53.242752ms
+Duration of the first run of the kernel: 4902.649902ms
+Duration of the second run of the kernel: 9163.570312ms
+NQ:23 NC:24 d:3
+Duration of Q and C hashing: 53.222752ms
+Duration of the first run of the kernel: 624.025574ms
+Duration of the second run of the kernel: 2414.308350ms
+NQ:23 NC:24 d:4
+Duration of Q and C hashing: 56.188000ms
+Duration of the first run of the kernel: 80.078850ms
+Duration of the second run of the kernel: 692.931580ms
+NQ:23 NC:24 d:5
+Duration of Q and C hashing: 58.799904ms
+Duration of the first run of the kernel: 12.401664ms
+Duration of the second run of the kernel: 227.250183ms
+NQ:23 NC:24 d:6
+Duration of Q and C hashing: 64.896004ms
+Duration of the first run of the kernel: 4.180992ms
+Duration of the second run of the kernel: 77.146111ms
+NQ:23 NC:25 d:2
+Duration of Q and C hashing: 80.125214ms
+Duration of the first run of the kernel: 9883.213867ms
+Duration of the second run of the kernel: 18113.886719ms
+NQ:23 NC:25 d:3
+Duration of Q and C hashing: 87.665123ms
+Duration of the first run of the kernel: 1216.239624ms
+Duration of the second run of the kernel: 4862.990234ms
+NQ:23 NC:25 d:4
+Duration of Q and C hashing: 85.323677ms
+Duration of the first run of the kernel: 152.795135ms
+Duration of the second run of the kernel: 1331.646484ms
+NQ:23 NC:25 d:5
+Duration of Q and C hashing: 91.245377ms
+Duration of the first run of the kernel: 22.589439ms
+Duration of the second run of the kernel: 418.953217ms
+NQ:23 NC:25 d:6
+Duration of Q and C hashing: 105.208061ms
+Duration of the first run of the kernel: 7.488512ms
+Duration of the second run of the kernel: 152.044540ms
+NQ:24 NC:21 d:2
+Duration of Q and C hashing: 46.882366ms
+Duration of the first run of the kernel: 1211.375610ms
+Duration of the second run of the kernel: 2095.661133ms
+NQ:24 NC:21 d:3
+Duration of Q and C hashing: 45.566559ms
+Duration of the first run of the kernel: 154.507263ms
+Duration of the second run of the kernel: 535.962646ms
+NQ:24 NC:21 d:4
+Duration of Q and C hashing: 45.722561ms
+Duration of the first run of the kernel: 19.775488ms
+Duration of the second run of the kernel: 161.719299ms
+NQ:24 NC:21 d:5
+Duration of Q and C hashing: 48.630718ms
+Duration of the first run of the kernel: 3.128320ms
+Duration of the second run of the kernel: 49.460224ms
+NQ:24 NC:21 d:6
+Duration of Q and C hashing: 53.745983ms
+Duration of the first run of the kernel: 1.302528ms
+Duration of the second run of the kernel: 15.519744ms
+NQ:24 NC:22 d:2
+Duration of Q and C hashing: 45.997345ms
+Duration of the first run of the kernel: 2457.311279ms
+Duration of the second run of the kernel: 3792.689209ms
+NQ:24 NC:22 d:3
+Duration of Q and C hashing: 48.158562ms
+Duration of the first run of the kernel: 301.046783ms
+Duration of the second run of the kernel: 989.779968ms
+NQ:24 NC:22 d:4
+Duration of Q and C hashing: 52.764832ms
+Duration of the first run of the kernel: 36.426750ms
+Duration of the second run of the kernel: 292.517883ms
+NQ:24 NC:22 d:5
+Duration of Q and C hashing: 57.791328ms
+Duration of the first run of the kernel: 5.403648ms
+Duration of the second run of the kernel: 92.085251ms
+NQ:24 NC:22 d:6
+Duration of Q and C hashing: 58.294334ms
+Duration of the first run of the kernel: 1.895424ms
+Duration of the second run of the kernel: 28.215296ms
+NQ:24 NC:23 d:2
+Duration of Q and C hashing: 50.051201ms
+Duration of the first run of the kernel: 4955.357422ms
+Duration of the second run of the kernel: 7541.261230ms
+NQ:24 NC:23 d:3
+Duration of Q and C hashing: 50.583328ms
+Duration of the first run of the kernel: 606.774292ms
+Duration of the second run of the kernel: 1913.222168ms
+NQ:24 NC:23 d:4
+Duration of Q and C hashing: 53.739841ms
+Duration of the first run of the kernel: 84.399101ms
+Duration of the second run of the kernel: 564.758545ms
+NQ:24 NC:23 d:5
+Duration of Q and C hashing: 60.368862ms
+Duration of the first run of the kernel: 12.796928ms
+Duration of the second run of the kernel: 187.584518ms
+NQ:24 NC:23 d:6
+Duration of Q and C hashing: 68.096893ms
+Duration of the first run of the kernel: 4.209664ms
+Duration of the second run of the kernel: 60.222466ms
+NQ:24 NC:24 d:2
+Duration of Q and C hashing: 64.881920ms
+Duration of the first run of the kernel: 9694.090820ms
+Duration of the second run of the kernel: 14467.042969ms
+NQ:24 NC:24 d:3
+Duration of Q and C hashing: 68.774239ms
+Duration of the first run of the kernel: 1256.515625ms
+Duration of the second run of the kernel: 4041.793457ms
+NQ:24 NC:24 d:4
+Duration of Q and C hashing: 70.244446ms
+Duration of the first run of the kernel: 157.892609ms
+Duration of the second run of the kernel: 1064.578003ms
+NQ:24 NC:24 d:5
+Duration of Q and C hashing: 77.308319ms
+Duration of the first run of the kernel: 23.242752ms
+Duration of the second run of the kernel: 341.583862ms
+NQ:24 NC:24 d:6
+Duration of Q and C hashing: 85.829826ms
+Duration of the first run of the kernel: 5.821440ms
+Duration of the second run of the kernel: 115.209213ms
+NQ:24 NC:25 d:2
+Duration of Q and C hashing: 97.798752ms
+Duration of the first run of the kernel: 19889.777344ms
+Duration of the second run of the kernel: 29627.578125ms
+NQ:24 NC:25 d:3
+Duration of Q and C hashing: 109.219040ms
+Duration of the first run of the kernel: 2451.765137ms
+Duration of the second run of the kernel: 8196.154297ms
+NQ:24 NC:25 d:4
+Duration of Q and C hashing: 104.950111ms
+Duration of the first run of the kernel: 293.071869ms
+Duration of the second run of the kernel: 2071.954346ms
+NQ:24 NC:25 d:5
+Duration of Q and C hashing: 112.258339ms
+Duration of the first run of the kernel: 42.276863ms
+Duration of the second run of the kernel: 645.284851ms
+NQ:24 NC:25 d:6
+Duration of Q and C hashing: 125.290077ms
+Duration of the first run of the kernel: 8.916992ms
+Duration of the second run of the kernel: 219.704315ms
+NQ:25 NC:21 d:2
+Duration of Q and C hashing: 71.886528ms
+Duration of the first run of the kernel: 2523.628662ms
+Duration of the second run of the kernel: 3230.739502ms
+NQ:25 NC:21 d:3
+Duration of Q and C hashing: 81.449280ms
+Duration of the first run of the kernel: 329.046021ms
+Duration of the second run of the kernel: 881.176575ms
+NQ:25 NC:21 d:4
+Duration of Q and C hashing: 77.848770ms
+Duration of the first run of the kernel: 44.746754ms
+Duration of the second run of the kernel: 256.310272ms
+NQ:25 NC:21 d:5
+Duration of Q and C hashing: 82.473854ms
+Duration of the first run of the kernel: 8.728576ms
+Duration of the second run of the kernel: 86.373375ms
+NQ:25 NC:21 d:6
+Duration of Q and C hashing: 93.122719ms
+Duration of the first run of the kernel: 4.097024ms
+Duration of the second run of the kernel: 27.739136ms
+NQ:25 NC:22 d:2
+Duration of Q and C hashing: 76.342300ms
+Duration of the first run of the kernel: 5020.020508ms
+Duration of the second run of the kernel: 6056.072266ms
+NQ:25 NC:22 d:3
+Duration of Q and C hashing: 84.695107ms
+Duration of the first run of the kernel: 628.971497ms
+Duration of the second run of the kernel: 1631.859741ms
+NQ:25 NC:22 d:4
+Duration of Q and C hashing: 80.531166ms
+Duration of the first run of the kernel: 81.288193ms
+Duration of the second run of the kernel: 459.204620ms
+NQ:25 NC:22 d:5
+Duration of Q and C hashing: 88.093277ms
+Duration of the first run of the kernel: 13.969408ms
+Duration of the second run of the kernel: 155.098114ms
+NQ:25 NC:22 d:6
+Duration of Q and C hashing: 98.529121ms
+Duration of the first run of the kernel: 4.695040ms
+Duration of the second run of the kernel: 49.231873ms
+NQ:25 NC:23 d:2
+Duration of Q and C hashing: 86.650558ms
+Duration of the first run of the kernel: 9983.917969ms
+Duration of the second run of the kernel: 11684.414062ms
+NQ:25 NC:23 d:3
+Duration of Q and C hashing: 90.600067ms
+Duration of the first run of the kernel: 1254.601685ms
+Duration of the second run of the kernel: 3188.929443ms
+NQ:25 NC:23 d:4
+Duration of Q and C hashing: 90.228195ms
+Duration of the first run of the kernel: 157.107193ms
+Duration of the second run of the kernel: 909.948914ms
+NQ:25 NC:23 d:5
+Duration of Q and C hashing: 99.172127ms
+Duration of the first run of the kernel: 20.549631ms
+Duration of the second run of the kernel: 278.807556ms
+NQ:25 NC:23 d:6
+Duration of Q and C hashing: 107.622658ms
+Duration of the first run of the kernel: 5.941248ms
+Duration of the second run of the kernel: 90.078209ms
+NQ:25 NC:24 d:2
+Duration of Q and C hashing: 99.546333ms
+Duration of the first run of the kernel: 19839.828125ms
+Duration of the second run of the kernel: 23734.820312ms
+NQ:25 NC:24 d:3
+Duration of Q and C hashing: 109.917725ms
+Duration of the first run of the kernel: 2478.403564ms
+Duration of the second run of the kernel: 6557.271973ms
+NQ:25 NC:24 d:4
+Duration of Q and C hashing: 110.615044ms
+Duration of the first run of the kernel: 293.351410ms
+Duration of the second run of the kernel: 1678.213135ms
+NQ:25 NC:24 d:5
+Duration of Q and C hashing: 116.214813ms
+Duration of the first run of the kernel: 40.370174ms
+Duration of the second run of the kernel: 520.480774ms
+NQ:25 NC:24 d:6
+Duration of Q and C hashing: 126.885345ms
+Duration of the first run of the kernel: 8.555520ms
+Duration of the second run of the kernel: 172.147705ms
+NQ:25 NC:25 d:2
+Duration of Q and C hashing: 128.243271ms
+Duration of the first run of the kernel: 40122.714844ms
+Duration of the second run of the kernel: 47447.144531ms
+NQ:25 NC:25 d:3
+Duration of Q and C hashing: 146.125793ms
+Duration of the first run of the kernel: 5060.568848ms
+Duration of the second run of the kernel: 13079.432617ms
+NQ:25 NC:25 d:4
+Duration of Q and C hashing: 139.490311ms
+Duration of the first run of the kernel: 572.246033ms
+Duration of the second run of the kernel: 3234.668457ms
+NQ:25 NC:25 d:5
+Duration of Q and C hashing: 148.751236ms
+Duration of the first run of the kernel: 75.133949ms
+Duration of the second run of the kernel: 995.202026ms
+NQ:25 NC:25 d:6
+Duration of Q and C hashing: 166.444962ms
+Duration of the first run of the kernel: 12.455936ms
+Duration of the second run of the kernel: 329.638916ms
