@@ -28,6 +28,7 @@ int main (int argc, char *argv[]) {
   cudaError_t err;
   char verboseFlag = 0;
   char noValidationFlag = 0;
+  char cpuValidationFlag = 0;
 
   // Parsing input arguments
   if (argc < 4) {
@@ -44,6 +45,11 @@ int main (int argc, char *argv[]) {
       {                 
         noValidationFlag = 1; // Do not run the slow validation in the end
       }
+    if (strcmp(argv[i], "--cpuvalidation") == 0)
+      {                 
+	cpuValidationFlag = 1; // Run the validation with the cpu code
+      }
+
     if (strncmp(argv[i], "-", 1) != 0) {
       NC = 1<<atoi(argv[i]);
       NQ = 1<<atoi(argv[i+1]);
@@ -222,11 +228,15 @@ int main (int argc, char *argv[]) {
 
   if(noValidationFlag==0) {
     /* Validating the NN results */
-    // CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
-    // CUDA_CALL(cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost));
-    // CUDA_CALL(cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost));
-    // cpuValidation(Q, NQ, C, NC, neighbor, verboseFlag);
-    gpuValidation(d_Q, NQ, d_C, NC, d_neighbor, verboseFlag, numberOfBlocks, threadsPerBlock);
+    if(cpuValidationFlag==1) {
+      CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
+      CUDA_CALL(cudaMemcpy(C, d_C, CSize, cudaMemcpyDeviceToHost));
+      CUDA_CALL(cudaMemcpy(Q, d_Q, QSize, cudaMemcpyDeviceToHost));
+      cpuValidation(Q, NQ, C, NC, neighbor, verboseFlag);
+    }
+    else {
+      gpuValidation(d_Q, NQ, d_C, NC, d_neighbor, verboseFlag, numberOfBlocks, threadsPerBlock);
+    }
   }
   
   /* Cleanup */
