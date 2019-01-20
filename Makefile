@@ -26,7 +26,7 @@ NVCCFLAGS = -c -I $(CUDAPATH)/include -Wno-deprecated-gpu-targets
 
 LFLAGS = -L$(CUDAPATH)/lib -lcuda -lcurand -Wno-deprecated-gpu-targets -ftz=true #here of above?
 
-all: build run
+all: build
 
 build: gpu #cpu
 	$(NVCC) $(LFLAGS) -o $(PROJECT_NAME) *.o
