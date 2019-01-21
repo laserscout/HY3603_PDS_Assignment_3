@@ -1,6 +1,7 @@
 /**********************************************************************
  *
- * cuNearestNeighbor.cu -- Find the nearest neighbor kernel
+ * cuNearestNeighbor2ndPass.h -- Kernel 2nd pass for the find 
+ *                                  of the nearest neighbor
  *
  * Frank Blanning <frankgou@auth.gr>
  * John Flionis <iflionis@auth.gr>

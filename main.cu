@@ -13,10 +13,10 @@
 #include <string.h>
 #include "cuRandFloat.h"
 #include "hashing3D.h"
-#include "cpuValidation.h"
-#include "gpuValidation.h"
 #include "cuNearestNeighbor.h"
 #include "cuNearestNeighbor2ndPass.h"
+#include "cpuValidation.h"
+#include "gpuValidation.h"
 
 #define DIM 3
 
@@ -168,22 +168,7 @@ int main (int argc, char *argv[]) {
   
 
   CUDA_CALL(cudaDeviceSynchronize());
-/*
-  CUDA_CALL(cudaMalloc(&d_checkOutside,checkOutsideSize));
-  
-  cuWhichCheckOutside<<<numberOfBlocks, threadsPerBlock>>>
-    (d_Q, NQ, d_checkOutside, d_QtoCheckOutside);
 
-  err = cudaGetLastError();
-  if (err != cudaSuccess) {
-      printf("Error \"%s\" at %s:%d\n", cudaGetErrorString(err),
-             __FILE__,__LINE__);
-      return EXIT_FAILURE;
-  }
-  
-
-  CUDA_CALL(cudaDeviceSynchronize());
-*/
   if(verboseFlag == 1) {
     CUDA_CALL(cudaMemcpy(neighbor, d_neighbor, neighborSize, cudaMemcpyDeviceToHost));
     printf(" ==== Neighbors! ==== \n");
